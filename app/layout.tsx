@@ -10,7 +10,7 @@ import {
 import { frFR } from "@clerk/localizations";
 import "./globals.css";
 import LeftSidebar from "@/components/layout/LeftSideBar";
-import AlertMessage from "@/components/layout/AlertMessage";
+import TopBar from "@/components/layout/TopBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +28,7 @@ export default function RootLayout({
         <ClerkProvider localization={frFR}>
             <html lang="fr">
                 <body className={`${inter.className}`}>
-                    <AlertMessage />
+                    <TopBar />
                     <main className="flex flex-row">
                         <SignedIn>
                             <LeftSidebar />

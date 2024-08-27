@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+nav {
+    --tw-bg-opacity: 1 background-color: rgb(255 255 255/var(--tw-bg-opacity));
+    /* border-color: rgb(229 231 235/var(--tw-border-opacity)); */
+    border-bottom-width: 1px;
+}
+
+aside a {
+    --tw-space-y-reverse: 0;
+    margin-bottom: calc(.5rem*var(--tw-space-y-reverse));
+    margin-top: calc(.5rem*(1 - var(--tw-space-y-reverse)));
+    --tw-text-opacity: 1;
+    color: rgb(17 24 39/var(--tw-text-opacity));
+}
+
+aside>div {
+    --tw-border-opacity: 1;
+    border-width: 1px;
+    border-color: rgb(229 231 235/var(--tw-border-opacity));
+}
+
+::after,
+::before {
+    border: 0 solid;
+    box-sizing: border-box;
+}

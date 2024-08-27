@@ -14,57 +14,47 @@ const LeftSidebar = () => {
     const { userId } = useAuth();
 
     return (
-        <section className="custom-scrollbar leftsidebar bg-slate-100 h-dvh w-1/6">
-            <div className="flex w-full flex-1 flex-col gap-6 px-6">
-                {sidebarLinks.map((link) => {
-                    const isActive =
-                        (pathname.includes(link.route) &&
-                            link.route.length > 1) ||
-                        pathname === link.route;
+        <aside className="flex w-64 duration-75 pt-16 flex-col">
+            <div className="pt-0 bg-white flex-col min-h-0 relative flex-1">
+                <div className="pb-4 pt-5 overflow-y-auto flex-col flex-1">
+                    <div className="pl-3 pr-3 bg-white flex-1">
+                        {sidebarLinks.map((link) => {
+                            // <li className="list-none space-y-reverse">
+                            //     <a
+                            //         className="font-normal text-base leading-6 p-2 items-center flex"
+                            //         href=""
+                            //     >
+                            //         {link.label}
+                            //     </a>
+                            // </li>
+                            const isActive =
+                                (pathname.includes(link.route) &&
+                                    link.route.length > 1) ||
+                                pathname === link.route;
 
-                    if (link.route === "/profile")
-                        link.route = `${link.route}/${userId}`;
+                            return (
+                                <Link
+                                    href={link.route}
+                                    key={link.label}
+                                    className={`font-normal text-base leading-6 p-2 items-center flex rounded-lg ${
+                                        isActive && "bg-slate-100"
+                                    }`}
+                                >
+                                    <Image
+                                        src={link.imgURL}
+                                        alt={link.label}
+                                        width={24}
+                                        height={24}
+                                    />
 
-                    return (
-                        <Link
-                            href={link.route}
-                            key={link.label}
-                            className={`leftsidebar_link ${
-                                isActive && "bg-primary-500 "
-                            }`}
-                        >
-                            <Image
-                                src={link.imgURL}
-                                alt={link.label}
-                                width={24}
-                                height={24}
-                            />
-
-                            <p className="text-light-1 max-lg:hidden">
-                                {link.label}
-                            </p>
-                        </Link>
-                    );
-                })}
+                                    <span className="ml-3">{link.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
-
-            <div className="mt-10 px-6">
-                <SignedIn>
-                    <SignOutButton>
-                        <div className="flex cursor-pointer gap-4 p-4">
-                            <Image
-                                src="/assets/logout.svg"
-                                alt="logout"
-                                width={24}
-                                height={24}
-                            />
-
-                            <p className="text-light-2 max-lg:hidden">Logout</p>
-                        </div>
-                    </SignOutButton>
-                </SignedIn>
-            </div>
-        </section>
+        </aside>
     );
 };
 
