@@ -4,6 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { SignOutButton, SignedIn, useAuth } from "@clerk/nextjs";
+import { Sidebar } from "flowbite-react";
+import {
+    HiArrowSmRight,
+    HiChartPie,
+    HiInbox,
+    HiShoppingBag,
+    HiTable,
+    HiUser,
+    HiViewBoards,
+} from "react-icons/hi";
 
 import { sidebarLinks } from "../../constants/index";
 
@@ -14,57 +24,40 @@ const LeftSidebar = () => {
     const { userId } = useAuth();
 
     return (
-        <section className="custom-scrollbar leftsidebar">
-            <div className="flex w-full flex-1 flex-col gap-6 px-6">
-                {sidebarLinks.map((link) => {
-                    const isActive =
-                        (pathname.includes(link.route) &&
-                            link.route.length > 1) ||
-                        pathname === link.route;
-
-                    if (link.route === "/profile")
-                        link.route = `${link.route}/${userId}`;
-
-                    return (
-                        <Link
-                            href={link.route}
-                            key={link.label}
-                            className={`leftsidebar_link ${
-                                isActive && "bg-primary-500 "
-                            }`}
+        <aside className="flex w-64 duration-75 pt-16 flex-col transition-transform sm:translate-x-0 -translate-x-full h-full">
+            <Sidebar aria-label="Default sidebar example">
+                <Sidebar.Items>
+                    <Sidebar.ItemGroup>
+                        <Sidebar.Item href="#" icon={HiChartPie}>
+                            Dashboard
+                        </Sidebar.Item>
+                        <Sidebar.Item
+                            href="#"
+                            icon={HiViewBoards}
+                            label="Pro"
+                            labelColor="dark"
                         >
-                            <Image
-                                src={link.imgURL}
-                                alt={link.label}
-                                width={24}
-                                height={24}
-                            />
-
-                            <p className="text-light-1 max-lg:hidden">
-                                {link.label}
-                            </p>
-                        </Link>
-                    );
-                })}
-            </div>
-
-            <div className="mt-10 px-6">
-                <SignedIn>
-                    <SignOutButton>
-                        <div className="flex cursor-pointer gap-4 p-4">
-                            <Image
-                                src="/assets/logout.svg"
-                                alt="logout"
-                                width={24}
-                                height={24}
-                            />
-
-                            <p className="text-light-2 max-lg:hidden">Logout</p>
-                        </div>
-                    </SignOutButton>
-                </SignedIn>
-            </div>
-        </section>
+                            Kanban
+                        </Sidebar.Item>
+                        <Sidebar.Item href="#" icon={HiInbox} label="3">
+                            Inbox
+                        </Sidebar.Item>
+                        <Sidebar.Item href="#" icon={HiUser}>
+                            Users
+                        </Sidebar.Item>
+                        <Sidebar.Item href="#" icon={HiShoppingBag}>
+                            Products
+                        </Sidebar.Item>
+                        <Sidebar.Item href="#" icon={HiArrowSmRight}>
+                            Sign In
+                        </Sidebar.Item>
+                        <Sidebar.Item href="#" icon={HiTable}>
+                            Sign Up
+                        </Sidebar.Item>
+                    </Sidebar.ItemGroup>
+                </Sidebar.Items>
+            </Sidebar>
+        </aside>
     );
 };
 
