@@ -24,7 +24,7 @@ const LeftSidebar = () => {
     const { userId } = useAuth();
 
     return (
-        <aside className="flex w-64 duration-75 pt-16 flex-col transition-transform sm:translate-x-0 -translate-x-full h-full">
+        <aside className="flex w-64 duration-75 flex-col transition-transform sm:translate-x-0 -translate-x-full h-full">
             <Sidebar aria-label="Default sidebar example">
                 <Sidebar.Items>
                     <Sidebar.ItemGroup>

@@ -27,14 +27,14 @@ export default function RootLayout({
     return (
         <ClerkProvider localization={frFR}>
             <html lang="fr">
-                <body className={`${inter.className}`}>
+                <body className={`${inter.className} flex flex-col `}>
                     <TopBar />
-                    <main className="flex flex-row">
+                    <main className="flex flex-row pt-16">
                         <SignedIn>
                             <LeftSidebar />
                         </SignedIn>
 
-                        <section className="main-container max-w-3xl w-5/6">
+                        <section className="main-container w-full p-8">
                             <div className="w-full">{children}</div>
                         </section>
                     </main>
