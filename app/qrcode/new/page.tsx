@@ -1,19 +1,19 @@
 "use client";
 
 import {
+    Alert,
     Button,
     FileInput,
     Label,
     Radio,
-    Select,
     TextInput,
 } from "flowbite-react";
 
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
-import { writeFile } from "fs/promises";
+import { ChangeEvent, useRef, useState } from "react";
 import { updateQRCode } from "@/lib/actions/qrcode.action";
+import { alertMessages } from "@/lib/messages/alert";
 
 interface Params {
     name: string;
@@ -21,19 +21,6 @@ interface Params {
     fileName?: string; // Optional, since it might be a URL
     entryUrl: string;
     redirectionUrl?: string; // Optional, only needed if not a file
-}
-
-interface QRCodeOptions {
-    type?: string;
-    quality?: number;
-    errorCorrectionLevel?: string;
-    margin?: number;
-    scale?: number;
-    width?: number;
-    color?: {
-        dark?: string;
-        light?: string;
-    };
 }
 
 const QrCodeNew = () => {
@@ -45,9 +32,23 @@ const QrCodeNew = () => {
     const router = useRouter();
     const svgContainer = useRef<HTMLDivElement>(null);
 
+    const [isFormValidated, setIsFormValidated] = useState(false);
+    const [alertMessageOn, setAlertMessageOn] = useState(false);
+    const [isFormLoading, setIsFormLoading] = useState(false);
+    const [formAlertClass, setFormAlertClass] = useState("");
+    const buttonProps = isFormLoading
+        ? { isProcessing: true, disabled: true }
+        : {};
+
+    console.log(alertMessages);
+
     const handleUrl = (e: ChangeEvent<HTMLInputElement>) => {
         const newUrl = e.target.value == "" ? " " : e.target.value;
         setUrl(newUrl);
+    };
+
+    const handlingFormStatus = () => {
+        setIsFormLoading(!isFormLoading);
     };
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
@@ -74,32 +75,29 @@ const QrCodeNew = () => {
 
     /** FORM HANDLING **/
     const formAction = async (formData: FormData) => {
-        // Send file to the public folder
-        if (isFileStatus) {
-            try {
-                const response = await fetch("/api/qrcode/upload", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (response.ok) {
-                    router.push("/");
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
-
-        return true;
-        const name = formData.get("qrcode_name") as string;
+        let name = formData.get("qrcode_name") as string;
         const entryUrl = `${
-            process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + name
+            process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + name.replace(" ", "_")
         }` as string;
 
         const isFile = formData.get("file_or_url") === "1";
         const file = formData.get("qrcode_file") as File;
-        const fileName = file.name as string;
+        let fileName = "";
 
+        if (file) {
+            fileName = file.name as string;
+            fileName = fileName.replace(" ", "_");
+            try {
+                const res = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!res.ok) throw new Error(await res.text());
+            } catch (e: any) {
+                console.log(e);
+            }
+        }
         const redirectionUrl = !isFileStatus
             ? (formData.get("qrcode_url") as string)
             : process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + fileName;
@@ -108,20 +106,40 @@ const QrCodeNew = () => {
         const params: Params = {
             name,
             isFile,
-            fileName, // Assuming file is handled properly
-            entryUrl, // Base URL as required
+            fileName,
+            entryUrl,
             redirectionUrl,
         };
 
         // Call the server action with the Params
-        await updateQRCode(params);
-
-        // After submission, navigate or display success
-        // router.push("/success-page");
+        const res = await updateQRCode(params);
+        if (res.status == 500) {
+            setIsFormValidated(false);
+            setAlertMessageOn(true);
+            setFormAlertClass("failure");
+        } else {
+            setIsFormValidated(true);
+            setUrl(entryUrl);
+            setFormAlertClass("success");
+            // router.push("/");
+        }
+        handlingFormStatus();
     };
 
     return (
         <>
+            {alertMessageOn && (
+                <Alert color={formAlertClass}>
+                    <span className="font-medium">
+                        {formAlertClass == "failure"
+                            ? alertMessages.qrcodeFailure.start
+                            : alertMessages.qrcodeSuccess.start}
+                    </span>{" "}
+                    {formAlertClass == "failure"
+                        ? alertMessages.qrcodeFailure.text
+                        : alertMessages.qrcodeSuccess.text}
+                </Alert>
+            )}
             <form
                 className="flex max-w-md flex-col gap-2 justify-around"
                 action={formAction}
@@ -145,7 +163,7 @@ const QrCodeNew = () => {
                             id="radioFile"
                             name="file_or_url"
                             value={1}
-                            onChange={handleIsFile}
+                            onChange={() => setIsFileStatus(!isFileStatus)}
                             defaultChecked
                         />
                         <Label htmlFor="radioFile">Fichier</Label>
@@ -185,24 +203,30 @@ const QrCodeNew = () => {
                         />
                     </>
                 )}
-                <div className="py-6" ref={svgContainer}>
-                    <SVG
-                        text={url}
-                        options={{
-                            margin: 2,
-                            width: 150,
-                            color: {
-                                dark: "#000000",
-                                light: "#FFFFFF",
-                            },
-                        }}
-                    />
-                </div>
-                <Button type="submit">Enregistrer le QR Code</Button>
+                <Button type="submit" {...buttonProps}>
+                    Enregistrer le QR Code
+                </Button>
             </form>
-            <Button type="button" onClick={downloadSvg}>
-                Télécharger le QR Code
-            </Button>
+            {isFormValidated && (
+                <>
+                    <div className="py-6 transition-all" ref={svgContainer}>
+                        <SVG
+                            text={url}
+                            options={{
+                                margin: 2,
+                                width: 150,
+                                color: {
+                                    dark: "#000000",
+                                    light: "#FFFFFF",
+                                },
+                            }}
+                        />
+                    </div>
+                    <Button type="button" onClick={downloadSvg}>
+                        Télécharger le QR Code
+                    </Button>
+                </>
+            )}
         </>
     );
 };

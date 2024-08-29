@@ -1,8 +1,5 @@
 "use server";
 
-import { FilterQuery, SortOrder } from "mongoose";
-import { revalidatePath } from "next/cache";
-
 import QRCode from "../models/qrcode.model";
 
 import { connectToDB } from "@/utils/database";
@@ -31,10 +28,11 @@ export async function updateQRCode({
     fileName,
     entryUrl,
     redirectionUrl,
-}: Params): Promise<void> {
-    "use server";
+}: Params): Promise<{ message: string; status: number }> {
     try {
         await connectToDB();
+
+        await QRCode.init(); // Wait for the index to build, to handle duplicate (name is unique)
 
         await QRCode.create({
             name,
@@ -43,7 +41,10 @@ export async function updateQRCode({
             entryUrl,
             redirectionUrl,
         });
+
+        return { message: "Success", status: 200 };
     } catch (error: any) {
-        throw new Error(`Failed to create/update user: ${error.message}`);
+        return { message: "Internal Server Error", status: 500 };
+        // throw new Error(`Failed to create/update user: ${error.message}`);
     }
 }
