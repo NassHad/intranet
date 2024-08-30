@@ -1,19 +1,16 @@
 "use client";
-
-import {
-    Alert,
-    Button,
-    FileInput,
-    Label,
-    Radio,
-    TextInput,
-} from "flowbite-react";
+import { Button } from "@/components/ui/button";
+import { Alert, FileInput, Label, Radio, TextInput } from "flowbite-react";
 
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useRef, useState } from "react";
 import { updateQRCode } from "@/lib/actions/qrcode.action";
 import { alertMessages } from "@/lib/messages/alert";
+import qrcodeFormSchema from "@/lib/schemas/qrcodeForm";
+import { z } from "zod";
+import { useFormState, useFormStatus } from "react-dom";
+import { SubmitHandler, useForm } from "react-hook-form";
 
 interface Params {
     name: string;
@@ -24,6 +21,7 @@ interface Params {
 }
 
 const QrCodeNew = () => {
+    type FormSchema = z.infer<typeof qrcodeFormSchema>;
     const { SVG } = useQRCode();
 
     const [url, setUrl] = useState(" ");
@@ -34,21 +32,11 @@ const QrCodeNew = () => {
 
     const [isFormValidated, setIsFormValidated] = useState(false);
     const [alertMessageOn, setAlertMessageOn] = useState(false);
-    const [isFormLoading, setIsFormLoading] = useState(false);
     const [formAlertClass, setFormAlertClass] = useState("");
-    const buttonProps = isFormLoading
-        ? { isProcessing: true, disabled: true }
-        : {};
-
-    console.log(alertMessages);
 
     const handleUrl = (e: ChangeEvent<HTMLInputElement>) => {
         const newUrl = e.target.value == "" ? " " : e.target.value;
         setUrl(newUrl);
-    };
-
-    const handlingFormStatus = () => {
-        setIsFormLoading(!isFormLoading);
     };
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
@@ -73,15 +61,38 @@ const QrCodeNew = () => {
         URL.revokeObjectURL(downloadUrl);
     };
 
+    // Button component
+    function SubmitButton() {
+        const { pending } = useFormStatus();
+        return <Button disabled={pending}>Enregistrer le QR Code</Button>;
+    }
+
+    const onSubmit = async (data: FormData) => {
+        console.log("SUCCESS", data);
+    };
+
+    const { register, handleSubmit, control } = useForm();
+
     /** FORM HANDLING **/
     const formAction = async (formData: FormData) => {
-        let name = formData.get("qrcode_name") as string;
+        console.log(formData);
+
+        const parsedFormValue = qrcodeFormSchema.safeParse(formData);
+
+        if (!parsedFormValue.success) {
+            const err = parsedFormValue.error.format();
+
+            setFormError(err);
+            return;
+        }
+
+        let name = formData.get("name") as string;
         const entryUrl = `${
             process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + name.replace(" ", "_")
         }` as string;
 
         const isFile = formData.get("file_or_url") === "1";
-        const file = formData.get("qrcode_file") as File;
+        const file = formData.get("file") as File;
         let fileName = "";
 
         if (file) {
@@ -99,7 +110,7 @@ const QrCodeNew = () => {
             }
         }
         const redirectionUrl = !isFileStatus
-            ? (formData.get("qrcode_url") as string)
+            ? (formData.get("redirectionUrl") as string)
             : process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + fileName;
 
         // Construct the Params object expected by updateQRCode
@@ -123,7 +134,6 @@ const QrCodeNew = () => {
             setFormAlertClass("success");
             // router.push("/");
         }
-        handlingFormStatus();
     };
 
     return (
@@ -142,14 +152,15 @@ const QrCodeNew = () => {
             )}
             <form
                 className="flex max-w-md flex-col gap-2 justify-around"
-                action={formAction}
+                onSubmit={handleSubmit(onSubmit)}
             >
                 <div className="mb-2 block">
                     <Label htmlFor="name" value="Nom du QR Code" />
                 </div>
+
                 <TextInput
                     id="name"
-                    name="qrcode_name"
+                    {...register("name")}
                     value={qrcodeName}
                     onChange={(e) => setQrcodeName(e.target.value)}
                     required
@@ -161,7 +172,7 @@ const QrCodeNew = () => {
                     <div className="flex items-center gap-2">
                         <Radio
                             id="radioFile"
-                            name="file_or_url"
+                            {...register("isFile")}
                             value={1}
                             onChange={() => setIsFileStatus(!isFileStatus)}
                             defaultChecked
@@ -171,7 +182,7 @@ const QrCodeNew = () => {
                     <div className="flex items-center gap-2">
                         <Radio
                             id="radioUrl"
-                            name="file_or_url"
+                            {...register("isFile")}
                             value={0}
                             onChange={() => setIsFileStatus(!isFileStatus)}
                         />
@@ -187,7 +198,7 @@ const QrCodeNew = () => {
                                 value="Choisissez le fichier"
                             />
                         </div>
-                        <FileInput id="file" name="qrcode_file" />
+                        <FileInput id="file" {...register("file")} />
                     </>
                 ) : (
                     <>
@@ -196,16 +207,17 @@ const QrCodeNew = () => {
                         </div>
                         <TextInput
                             id="url"
-                            name="qrcode_url"
+                            {...register("redirectionUrl")}
                             placeholder="exemple: https://www.youtube.com"
                             onChange={handleUrl}
                             value={url}
                         />
                     </>
                 )}
-                <Button type="submit" {...buttonProps}>
+                <SubmitButton />
+                {/* <Button type="submit" isProcessing={pending} disabled={pending}>
                     Enregistrer le QR Code
-                </Button>
+                </Button> */}
             </form>
             {isFormValidated && (
                 <>
