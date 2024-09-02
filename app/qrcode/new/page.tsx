@@ -1,6 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Alert, FileInput, Label, Radio, TextInput } from "flowbite-react";
+import { Input } from "@/components/ui/input";
+import { Alert } from "flowbite-react";
+import { DevTool } from "@hookform/devtools";
 
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/navigation";
@@ -10,7 +12,23 @@ import { alertMessages } from "@/lib/messages/alert";
 import qrcodeFormSchema from "@/lib/schemas/qrcodeForm";
 import { z } from "zod";
 import { useFormState, useFormStatus } from "react-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
+import {
+    Controller,
+    Form,
+    FormProvider,
+    SubmitHandler,
+    useForm,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface Params {
     name: string;
@@ -21,22 +39,43 @@ interface Params {
 }
 
 const QrCodeNew = () => {
-    type FormSchema = z.infer<typeof qrcodeFormSchema>;
+    const form = useForm<z.infer<typeof qrcodeFormSchema>>({
+        defaultValues: {
+            name: "",
+            isFile: "1",
+            file: "",
+            redirectionUrl: "",
+        },
+        resolver: zodResolver(qrcodeFormSchema),
+    });
+
+    const isFile = form.watch("isFile");
+
     const { SVG } = useQRCode();
 
     const [url, setUrl] = useState(" ");
     const [qrcodeName, setQrcodeName] = useState("");
     const [isFileStatus, setIsFileStatus] = useState(true);
+    const [isFileStatusString, setIsFileStatusString] = useState("1");
     const router = useRouter();
     const svgContainer = useRef<HTMLDivElement>(null);
 
     const [isFormValidated, setIsFormValidated] = useState(false);
     const [alertMessageOn, setAlertMessageOn] = useState(false);
     const [formAlertClass, setFormAlertClass] = useState("");
+    const fileRef = form.register("file");
 
     const handleUrl = (e: ChangeEvent<HTMLInputElement>) => {
         const newUrl = e.target.value == "" ? " " : e.target.value;
         setUrl(newUrl);
+    };
+
+    const handleIsFileStatus = (e: ChangeEvent<HTMLInputElement>) => {
+        setIsFileStatus(!isFileStatus);
+        const newIsFileValue = isFileStatusString == "1" ? "0" : "1";
+        console.log(newIsFileValue);
+
+        setIsFileStatusString(newIsFileValue);
     };
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
@@ -64,14 +103,12 @@ const QrCodeNew = () => {
     // Button component
     function SubmitButton() {
         const { pending } = useFormStatus();
-        return <Button disabled={pending}>Enregistrer le QR Code</Button>;
+        return;
     }
 
-    const onSubmit = async (data: FormData) => {
-        console.log("SUCCESS", data);
-    };
-
-    const { register, handleSubmit, control } = useForm();
+    function onSubmit(data: z.infer<typeof qrcodeFormSchema>) {
+        console.log(data);
+    }
 
     /** FORM HANDLING **/
     const formAction = async (formData: FormData) => {
@@ -150,75 +187,143 @@ const QrCodeNew = () => {
                         : alertMessages.qrcodeSuccess.text}
                 </Alert>
             )}
-            <form
-                className="flex max-w-md flex-col gap-2 justify-around"
-                onSubmit={handleSubmit(onSubmit)}
-            >
-                <div className="mb-2 block">
-                    <Label htmlFor="name" value="Nom du QR Code" />
-                </div>
 
-                <TextInput
-                    id="name"
-                    {...register("name")}
-                    value={qrcodeName}
-                    onChange={(e) => setQrcodeName(e.target.value)}
-                    required
-                />
-                <fieldset className="flex max-w-md flex-col gap-4">
-                    <legend className="my-4">
-                        Redirection vers une url ou un fichier ?
-                    </legend>
-                    <div className="flex items-center gap-2">
-                        <Radio
-                            id="radioFile"
-                            {...register("isFile")}
-                            value={1}
-                            onChange={() => setIsFileStatus(!isFileStatus)}
-                            defaultChecked
-                        />
-                        <Label htmlFor="radioFile">Fichier</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Radio
-                            id="radioUrl"
-                            {...register("isFile")}
-                            value={0}
-                            onChange={() => setIsFileStatus(!isFileStatus)}
-                        />
-                        <Label htmlFor="radioUrl">URL</Label>
-                    </div>
-                </fieldset>
-
-                {isFileStatus ? (
-                    <>
-                        <div className="mt-4 block">
-                            <Label
-                                htmlFor="file"
-                                value="Choisissez le fichier"
+            <FormProvider {...form}>
+                <form
+                    className="flex max-w-md flex-col gap-2 justify-around"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                >
+                    <FormField
+                        name="name"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nom du QR Code</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        {...field}
+                                        value={field.value || ""}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    Le nom est obligatoire
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        name="isFile"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormControl>
+                                <RadioGroup
+                                    name={field.name}
+                                    onValueChange={field.onChange}
+                                    onChange={handleIsFileStatus}
+                                    className="flex flex-col space-y-1"
+                                >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                            <RadioGroupItem value="1" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                            Fichier
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                            <RadioGroupItem value="2" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                            Url
+                                        </FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                        )}
+                    />
+                    {/* <fieldset className="flex max-w-md flex-col gap-4">
+                        <legend className="my-4">
+                            Redirection vers une url ou un fichier ?
+                        </legend>
+                        <div className="flex items-center gap-2">
+                            <Radio
+                                id="radioFile"
+                                {...register("isFile")}
+                                value={1}
+                                onChange={() => setIsFileStatus(!isFileStatus)}
+                                defaultChecked
                             />
+                            <Label htmlFor="radioFile">Fichier</Label>
                         </div>
-                        <FileInput id="file" {...register("file")} />
-                    </>
-                ) : (
-                    <>
-                        <div className="mt-4 block">
-                            <Label htmlFor="url" value="URL" />
+                        <div className="flex items-center gap-2">
+                            <Radio
+                                id="radioUrl"
+                                {...register("isFile")}
+                                value={0}
+                                onChange={() => setIsFileStatus(!isFileStatus)}
+                            />
+                            <Label htmlFor="radioUrl">URL</Label>
                         </div>
-                        <TextInput
-                            id="url"
-                            {...register("redirectionUrl")}
-                            placeholder="exemple: https://www.youtube.com"
-                            onChange={handleUrl}
-                            value={url}
-                        />
-                    </>
-                )}
-                <SubmitButton />
-                {/* <Button type="submit" isProcessing={pending} disabled={pending}>
-                    Enregistrer le QR Code
-                </Button> */}
-            </form>
+                    </fieldset> */}
+
+                    {isFile === "1" ? (
+                        <>
+                            <FormField
+                                name="file"
+                                control={form.control}
+                                render={() => (
+                                    <FormItem>
+                                        <FormLabel>Fichier</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="file"
+                                                {...fileRef}
+                                                defaultValue={""}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Obligatoire
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <FormField
+                                name="redirectionUrl"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            L'url vers laquelle le QR Code sera
+                                            redirigé
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="text"
+                                                {...field}
+                                                defaultValue={""}
+                                            />
+                                        </FormControl>
+                                        <FormDescription>
+                                            Obligatoire
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
+                    {/* <SubmitButton /> */}
+                    <Button type="submit">Enregistrer le QR Code</Button>
+                </form>
+            </FormProvider>
+            {/* <DevTool control={form.control} /> */}
             {isFormValidated && (
                 <>
                     <div className="py-6 transition-all" ref={svgContainer}>

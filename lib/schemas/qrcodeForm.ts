@@ -10,22 +10,12 @@ const qrcodeFormSchema = z.object({
         .max(100, { message: "Le nom doit avoir maximum 50 caractères" })
         .trim(),
 
-    isFile: z.boolean({
-        invalid_type_error: "isFile must be a boolean",
-    }),
+    isFile: z.string(),
     filename: z.string().refine((filename) => {
         ACCEPTED_FILE_TYPES.includes(filename);
     }),
     redirectionUrl: z.string().url(),
-    file: z
-        .instanceof(File)
-        .optional()
-        .refine((file) => {
-            return !file || file.size <= MAX_UPLOAD_SIZE;
-        }, "Le fichier est trop volumineux (21MB maximum)")
-        .refine((file) => {
-            return file ? ACCEPTED_FILE_TYPES.includes(file.type) : false;
-        }, "Le fichier doit avoir l'un des formats suivants : pdf, mp4, png, jpg"),
+    file: typeof window === "undefined" ? z.any() : z.instanceof(FileList),
 });
 
 export default qrcodeFormSchema;
