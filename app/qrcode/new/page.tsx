@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Alert } from "flowbite-react";
 import { DevTool } from "@hookform/devtools";
 
 import { useQRCode } from "next-qrcode";
@@ -11,7 +10,7 @@ import { updateQRCode } from "@/lib/actions/qrcode.action";
 import { alertMessages } from "@/lib/messages/alert";
 import qrcodeFormSchema from "@/lib/schemas/qrcodeForm";
 import { z } from "zod";
-import { useFormState, useFormStatus } from "react-dom";
+
 import {
     Controller,
     Form,
@@ -38,25 +37,25 @@ interface Params {
     redirectionUrl?: string; // Optional, only needed if not a file
 }
 
+const defaultValues = {
+    name: "",
+    isFile: "1", // Default to file selection
+    file: undefined, // Start with no file selected
+    filename: "",
+    redirectionUrl: "",
+};
+
 const QrCodeNew = () => {
-    const form = useForm<z.infer<typeof qrcodeFormSchema>>({
-        defaultValues: {
-            name: "",
-            isFile: "1",
-            file: "",
-            redirectionUrl: "",
-        },
-        resolver: zodResolver(qrcodeFormSchema),
+    const form = useForm({
+        defaultValues,
     });
 
     const isFile = form.watch("isFile");
-
     const { SVG } = useQRCode();
 
     const [url, setUrl] = useState(" ");
     const [qrcodeName, setQrcodeName] = useState("");
     const [isFileStatus, setIsFileStatus] = useState(true);
-    const [isFileStatusString, setIsFileStatusString] = useState("1");
     const router = useRouter();
     const svgContainer = useRef<HTMLDivElement>(null);
 
@@ -72,10 +71,7 @@ const QrCodeNew = () => {
 
     const handleIsFileStatus = (e: ChangeEvent<HTMLInputElement>) => {
         setIsFileStatus(!isFileStatus);
-        const newIsFileValue = isFileStatusString == "1" ? "0" : "1";
-        console.log(newIsFileValue);
-
-        setIsFileStatusString(newIsFileValue);
+        // form.reset();
     };
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
@@ -100,15 +96,15 @@ const QrCodeNew = () => {
         URL.revokeObjectURL(downloadUrl);
     };
 
-    // Button component
-    function SubmitButton() {
-        const { pending } = useFormStatus();
-        return;
-    }
-
-    function onSubmit(data: z.infer<typeof qrcodeFormSchema>) {
+    const onSubmit: SubmitHandler<{
+        name: string;
+        isFile?: any;
+        file?: any;
+        filename?: string | undefined;
+        redirectionUrl?: string | undefined;
+    }> = (data: any) => {
         console.log(data);
-    }
+    };
 
     /** FORM HANDLING **/
     const formAction = async (formData: FormData) => {
@@ -175,19 +171,6 @@ const QrCodeNew = () => {
 
     return (
         <>
-            {alertMessageOn && (
-                <Alert color={formAlertClass}>
-                    <span className="font-medium">
-                        {formAlertClass == "failure"
-                            ? alertMessages.qrcodeFailure.start
-                            : alertMessages.qrcodeSuccess.start}
-                    </span>{" "}
-                    {formAlertClass == "failure"
-                        ? alertMessages.qrcodeFailure.text
-                        : alertMessages.qrcodeSuccess.text}
-                </Alert>
-            )}
-
             <FormProvider {...form}>
                 <form
                     className="flex max-w-md flex-col gap-2 justify-around"
@@ -222,6 +205,7 @@ const QrCodeNew = () => {
                                     name={field.name}
                                     onValueChange={field.onChange}
                                     onChange={handleIsFileStatus}
+                                    defaultValue="1"
                                     className="flex flex-col space-y-1"
                                 >
                                     <FormItem className="flex items-center space-x-3 space-y-0">
@@ -269,57 +253,44 @@ const QrCodeNew = () => {
                         </div>
                     </fieldset> */}
 
-                    {isFile === "1" ? (
-                        <>
-                            <FormField
-                                name="file"
-                                control={form.control}
-                                render={() => (
-                                    <FormItem>
-                                        <FormLabel>Fichier</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="file"
-                                                {...fileRef}
-                                                defaultValue={""}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Obligatoire
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <FormField
-                                name="redirectionUrl"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            L'url vers laquelle le QR Code sera
-                                            redirigé
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="text"
-                                                {...field}
-                                                defaultValue={""}
-                                            />
-                                        </FormControl>
-                                        <FormDescription>
-                                            Obligatoire
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </>
-                    )}
-                    {/* <SubmitButton /> */}
+                    <FormField
+                        name="file"
+                        control={form.control}
+                        render={() => (
+                            <FormItem>
+                                <FormLabel>Fichier</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="file"
+                                        {...fileRef}
+                                        disabled={!isFileStatus}
+                                    />
+                                </FormControl>
+                                <FormDescription>Obligatoire</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        name="redirectionUrl"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Url de redirection</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        {...field}
+                                        placeholder="exemple: https://www.youtube.com/watch?v=sRWWKswifRA"
+                                        disabled={isFileStatus}
+                                    />
+                                </FormControl>
+                                <FormDescription>Obligatoire</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <Button type="submit">Enregistrer le QR Code</Button>
                 </form>
             </FormProvider>

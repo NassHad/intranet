@@ -1,23 +1,27 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { connectToDB } from "@/utils/database";
+import QRCode from "@/lib/models/qrcode.model";
 import User from "@/lib/models/user.model";
+import { currentUser } from "@clerk/nextjs/server";
 
-const saveUser = async (req: NextApiRequest, res: NextApiResponse) => {
+export async function POST(request: Request) {
     await connectToDB();
 
-    if (req.method === "POST") {
-        const { firstname, lastname, email, password } = req.body;
+    try {
+        const body = await request.json();
+        const { name, hasFile, file, url } = body;
+        const mediaUrl = "https://media.gti-sodifac.com/";
+        const qrCode = new QRCode({
+            name: name.trim(),
+            isFile: hasFile === "yes",
+            fileName: hasFile === "yes" ? file.name : null,
+            entryUrl: mediaUrl + name.trim().replace(/\s+/g, "").toLowerCase(),
+            redirectionUrl: hasFile === "no" ? url : mediaUrl + "/" + file.name,
+        });
 
-        try {
-            const user = new User({ firstname, lastname, email, password });
-            await user.save();
-            res.status(200).json({ message: "User saved successfully", user });
-        } catch (error) {
-            res.status(500).json({ message: "Failed to save user", error });
-        }
-    } else {
-        res.status(405).json({ message: "Method not allowed" });
+        await qrCode.save();
+        return NextResponse.json({ success: true, data: qrCode });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message });
     }
-};
-
-export default saveUser;
+}
