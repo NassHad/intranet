@@ -1,12 +1,18 @@
 import { FieldError, UseFormRegister } from "react-hook-form";
+import mongoose from "mongoose";
 
-export type FormData = {
+export interface IQRCode {
+    _id: mongoose.Types.ObjectId;
     name: string;
-    redirectionUrl: string;
     isFile: boolean;
-    file: File;
-    fileName: string;
-};
+    fileName?: string;
+    entryUrl: string;
+    redirectionUrl: string;
+    createdBy: mongoose.Types.ObjectId;
+    createdAt: Date;
+    updatedBy: mongoose.Types.ObjectId;
+    updatedAt: Date;
+}
 
 export type FormFieldProps = {
     type: string;

@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useState, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,37 +17,53 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
-import qrcodeFormSchema from "@/lib/schemas/qrcodeForm";
+import { IQRCode } from "@/lib/types/types";
 import { useQRCode } from "next-qrcode";
 
-type FormValues = z.infer<typeof qrcodeFormSchema>;
+// Toast
+import { useToast } from "@/hooks/use-toast";
 
-export default function QRCodeNewForm() {
+const qrcodeUpdateSchema = z.object({
+    name: z.string().min(3, {
+        message: "Name must be at least 2 characters.",
+    }),
+    hasFile: z.enum(["yes", "no"]),
+    file: z.instanceof(File).optional(),
+    url: z.string().url().optional(),
+});
+
+type FormValues = z.infer<typeof qrcodeUpdateSchema>;
+
+interface UpdateQRCodeFormProps {
+    qrCode: IQRCode;
+}
+
+export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const svgContainer = useRef<HTMLDivElement>(null);
+
     const [qrcodeName, setQrcodeName] = useState("");
     const [qrcodeUrl, setQrcodeUrl] = useState(" "); // Have to be an empty string to prevent error
     const [showSVG, setShowSVG] = useState(false);
     const { SVG } = useQRCode();
-    const [generalError, setGeneralError] = useState<string | null>(null);
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(qrcodeFormSchema),
+        resolver: zodResolver(qrcodeUpdateSchema),
         defaultValues: {
-            name: "",
-            hasFile: "no",
-            url: "",
+            // Populate the form with default values
+            name: qrCode.name,
+            hasFile: qrCode.isFile ? "yes" : "no",
+            url: qrCode.isFile ? "" : qrCode.redirectionUrl,
         },
     });
+
+    const watchHasFile = form.watch("hasFile");
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
         return new Blob([svgHtml], { type: "image/svg+xml" });
     };
 
-    /** SVG DOWNLOAD **/
     const downloadSvg = () => {
         const svgHtml = svgContainer.current?.innerHTML;
 
@@ -63,16 +80,13 @@ export default function QRCodeNewForm() {
         URL.revokeObjectURL(downloadUrl);
     };
 
-    const watchHasFile = form.watch("hasFile");
-
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true);
         setShowSVG(false);
-        setGeneralError(null);
-        form.clearErrors();
 
         try {
             const formData = new FormData();
+            formData.append("id", qrCode._id.toString());
             formData.append("name", data.name);
             formData.append("hasFile", data.hasFile);
 
@@ -82,69 +96,42 @@ export default function QRCodeNewForm() {
                 formData.append("url", data.url);
             }
 
-            const response = await fetch("/api/qrcode", {
-                method: "POST",
+            const response = await fetch("/api/qrcode/update", {
+                method: "PUT",
                 body: formData,
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
-                if (response.status === 400 && result.error) {
-                    if (typeof result.error === "string") {
-                        setGeneralError(result.error);
-                    } else if (typeof result.error === "object") {
-                        Object.keys(result.error).forEach((key) => {
-                            form.setError(key as keyof FormValues, {
-                                type: "manual",
-                                message: result.error[key],
-                            });
-                        });
-                    }
-                    throw new Error(
-                        typeof result.error === "string"
-                            ? result.error
-                            : "Le formulaire n'a pas pu être enregistré"
-                    );
-                } else {
-                    throw new Error("Failed to submit form 2");
-                }
+                throw new Error("Failed to update QR code");
             }
 
+            const result = await response.json();
             setQrcodeName(result.data.name);
             setQrcodeUrl(result.data.entryUrl);
-            setShowSVG(true);
+            console.log(result);
 
             toast({
-                title: "Form submitted successfully",
-                description: "Your QR code data has been saved.",
+                title: "QR code updated successfully",
+                description: "Your QR code has been updated.",
             });
-        } catch (error: any) {
-            console.error("Submission error:", error);
-            if (!generalError) {
-                setGeneralError(
-                    error.message ||
-                        "An unexpected error occurred. Please try again."
-                );
-            }
+        } catch (error) {
+            console.error("Update error:", error);
+            console.log(error);
+
             toast({
                 title: "Error",
-                description:
-                    error.message || "Failed to submit form. Please try again.",
+                description: "Failed to update QR code. Please try again.",
                 variant: "destructive",
             });
         } finally {
             setIsSubmitting(false);
+            setShowSVG(true);
         }
     }
 
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4">Créer un QR Code</h1>
             <Form {...form}>
-                {/* {generalError && (
-                    <div className="text-red-500 mb-4">{generalError}</div>
-                )} */}
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-8"
@@ -154,7 +141,7 @@ export default function QRCodeNewForm() {
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Nom</FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Entrez un nom"
@@ -223,7 +210,11 @@ export default function QRCodeNewForm() {
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Upload a file (max 5MB).
+                                        Fichier actuel:{" "}
+                                        {qrCode.fileName != ""
+                                            ? qrCode.fileName
+                                            : "Aucun"}
+                                        .
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -244,7 +235,7 @@ export default function QRCodeNewForm() {
                                         />
                                     </FormControl>
                                     <FormDescription>
-                                        Ne pas oublier http:// ou https://
+                                        Provide a valid URL.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -252,7 +243,7 @@ export default function QRCodeNewForm() {
                         />
                     )}
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Submitting..." : "Submit"}
+                        {isSubmitting ? "En cours..." : "Mettre à jour"}
                     </Button>
                 </form>
             </Form>
