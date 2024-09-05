@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, QrCode } from "lucide-react";
+import { Gauge, QrCode, Calendar } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 
 export default function LeftSidebar() {
@@ -23,8 +23,8 @@ export default function LeftSidebar() {
                                 pathname === "/" && "bg-accent"
                             )}
                         >
-                            <Home className="mr-2 h-4 w-4" />
-                            Accueil
+                            <Gauge className="mr-2 h-4 w-4" />
+                            Tableau de bord
                         </Button>
                     </Link>
                     <Link href="/qrcode" passHref>
@@ -39,9 +39,20 @@ export default function LeftSidebar() {
                             QR Code
                         </Button>
                     </Link>
+                    <Link href="/calendar" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/calendar" && "bg-accent"
+                            )}
+                        >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Planning
+                        </Button>
+                    </Link>
                 </nav>
             </ScrollArea>
-            {/* <SignOutButton /> */}
         </div>
     );
 }
