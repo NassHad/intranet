@@ -1,4 +1,3 @@
-// app/api/qrcode/update/route.ts
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/utils/database";
 import QRCode from "@/lib/models/qrcode.model";
@@ -49,5 +48,37 @@ export async function PUT(request: Request) {
             { success: false, error: error.message },
             { status: 500 }
         );
+    }
+}
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: { id: String } }
+) {
+    await connectToDB();
+
+    try {
+        const { id } = params;
+
+        // Check if the QR code exists
+        const qrCode = await QRCode.findById(id);
+
+        if (!qrCode) {
+            return NextResponse.json(
+                { success: false, error: "QR code not found" },
+                { status: 404 }
+            );
+        }
+        console.log(qrCode);
+        console.log(id);
+
+        // Delete the QR code
+        await QRCode.findByIdAndDelete(id);
+        return NextResponse.json({
+            success: true,
+            message: "QR code deleted successfully",
+        });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message });
     }
 }

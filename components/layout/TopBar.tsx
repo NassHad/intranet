@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function TopBar() {
     return (
-        <nav className="fixed w-full z-30 bg-white">
+        <nav className="w-full z-30 bg-white border-b-2">
             <div className="pl-3 pr-5 pb-3 pt-3">
                 <div className="flex justify-between items-center">
                     <div className="flex justify-start items-center">
@@ -27,6 +27,7 @@ export default function TopBar() {
                             width={48}
                             height={48}
                         />
+                        <span className="text-2xl">Intranet</span>
                     </div>
                     <div className="items-center flex"></div>
                 </div>

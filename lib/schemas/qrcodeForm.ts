@@ -19,4 +19,6 @@ const qrcodeFormSchema = z.discriminatedUnion("hasFile", [
     }),
 ]);
 
+export type FormValues = z.infer<typeof qrcodeFormSchema>;
+
 export default qrcodeFormSchema;

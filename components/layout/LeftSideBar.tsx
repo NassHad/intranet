@@ -1,64 +1,47 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { SignOutButton, SignedIn, useAuth } from "@clerk/nextjs";
-import { Sidebar } from "flowbite-react";
-import {
-    HiArrowSmRight,
-    HiChartPie,
-    HiInbox,
-    HiShoppingBag,
-    HiTable,
-    HiUser,
-    HiViewBoards,
-} from "react-icons/hi";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Home, QrCode } from "lucide-react";
+import { SignOutButton } from "@clerk/nextjs";
 
-import { sidebarLinks } from "../../constants/index";
-
-const LeftSidebar = () => {
-    const router = useRouter();
+export default function LeftSidebar() {
     const pathname = usePathname();
 
-    const { userId } = useAuth();
-
     return (
-        <aside className="flex w-64 duration-75 flex-col transition-transform sm:translate-x-0 -translate-x-full h-full">
-            <Sidebar aria-label="Default sidebar example">
-                <Sidebar.Items>
-                    <Sidebar.ItemGroup>
-                        <Sidebar.Item href="#" icon={HiChartPie}>
-                            Dashboard
-                        </Sidebar.Item>
-                        <Sidebar.Item
-                            href="#"
-                            icon={HiViewBoards}
-                            label="Pro"
-                            labelColor="dark"
+        <div className="flex w-64 flex-col border-r bg-background leftSideBar">
+            <ScrollArea className="flex-1">
+                <nav className="flex flex-col gap-2 p-4">
+                    <Link href="/" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/" && "bg-accent"
+                            )}
                         >
-                            Kanban
-                        </Sidebar.Item>
-                        <Sidebar.Item href="#" icon={HiInbox} label="3">
-                            Inbox
-                        </Sidebar.Item>
-                        <Sidebar.Item href="#" icon={HiUser}>
-                            Users
-                        </Sidebar.Item>
-                        <Sidebar.Item href="#" icon={HiShoppingBag}>
-                            Products
-                        </Sidebar.Item>
-                        <Sidebar.Item href="#" icon={HiArrowSmRight}>
-                            Sign In
-                        </Sidebar.Item>
-                        <Sidebar.Item href="#" icon={HiTable}>
-                            Sign Up
-                        </Sidebar.Item>
-                    </Sidebar.ItemGroup>
-                </Sidebar.Items>
-            </Sidebar>
-        </aside>
+                            <Home className="mr-2 h-4 w-4" />
+                            Accueil
+                        </Button>
+                    </Link>
+                    <Link href="/qrcode" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/qrcode" && "bg-accent"
+                            )}
+                        >
+                            <QrCode className="mr-2 h-4 w-4" />
+                            QR Code
+                        </Button>
+                    </Link>
+                </nav>
+            </ScrollArea>
+            {/* <SignOutButton /> */}
+        </div>
     );
-};
-
-export default LeftSidebar;
+}

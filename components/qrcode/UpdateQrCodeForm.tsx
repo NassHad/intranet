@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { IQRCode } from "@/lib/types/types";
+import { IQRCode, QRCode } from "@/lib/types/types";
 import { useQRCode } from "next-qrcode";
 
 // Toast
@@ -35,7 +35,7 @@ const qrcodeUpdateSchema = z.object({
 type FormValues = z.infer<typeof qrcodeUpdateSchema>;
 
 interface UpdateQRCodeFormProps {
-    qrCode: IQRCode;
+    qrCode: QRCode;
 }
 
 export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
@@ -96,10 +96,13 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                 formData.append("url", data.url);
             }
 
-            const response = await fetch("/api/qrcode/update", {
-                method: "PUT",
-                body: formData,
-            });
+            const response = await fetch(
+                `/api/qrcode/${qrCode._id.toString()}`,
+                {
+                    method: "PUT",
+                    body: formData,
+                }
+            );
 
             if (!response.ok) {
                 throw new Error("Failed to update QR code");
