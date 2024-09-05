@@ -63,7 +63,17 @@
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
+}
+
+.cl-rootBox {
+  margin: 0 auto;
+  padding-top: 4rem;
+}
+
+.leftSideBar {
+  height: 92vh;
 }

@@ -1,229 +1,120 @@
+// app/qrcode/new/page.tsx
 "use client";
-import { Button } from "@/components/ui/button";
-import { Alert, FileInput, Label, Radio, TextInput } from "flowbite-react";
 
+import { useState, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useQRCode } from "next-qrcode";
-import { useRouter } from "next/navigation";
-import { ChangeEvent, useRef, useState } from "react";
-import { updateQRCode } from "@/lib/actions/qrcode.action";
-import { alertMessages } from "@/lib/messages/alert";
-import qrcodeFormSchema from "@/lib/schemas/qrcodeForm";
-import { z } from "zod";
-import { useFormState, useFormStatus } from "react-dom";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { CreateQRCodeForm } from "@/components/qrcode/CreateQrCodeForm";
+import type { FormValues } from "@/lib/schemas/qrcodeForm";
+import QRCodeFormLayout from "../form-layout";
 
-interface Params {
-    name: string;
-    isFile: boolean;
-    fileName?: string; // Optional, since it might be a URL
-    entryUrl: string;
-    redirectionUrl?: string; // Optional, only needed if not a file
-}
-
-const QrCodeNew = () => {
-    type FormSchema = z.infer<typeof qrcodeFormSchema>;
-    const { SVG } = useQRCode();
-
-    const [url, setUrl] = useState(" ");
-    const [qrcodeName, setQrcodeName] = useState("");
-    const [isFileStatus, setIsFileStatus] = useState(true);
-    const router = useRouter();
+export default function QRCodeNewForm() {
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const svgContainer = useRef<HTMLDivElement>(null);
-
-    const [isFormValidated, setIsFormValidated] = useState(false);
-    const [alertMessageOn, setAlertMessageOn] = useState(false);
-    const [formAlertClass, setFormAlertClass] = useState("");
-
-    const handleUrl = (e: ChangeEvent<HTMLInputElement>) => {
-        const newUrl = e.target.value == "" ? " " : e.target.value;
-        setUrl(newUrl);
-    };
+    const [qrcodeName, setQrcodeName] = useState("");
+    const [qrcodeUrl, setQrcodeUrl] = useState(" ");
+    const [showSVG, setShowSVG] = useState(false);
+    const { SVG } = useQRCode();
+    const [generalError, setGeneralError] = useState<string | null>(null);
 
     const convertSvgToBlob = (svgHtml: any): Blob => {
         return new Blob([svgHtml], { type: "image/svg+xml" });
     };
 
-    /** SVG DOWNLOAD **/
     const downloadSvg = () => {
         const svgHtml = svgContainer.current?.innerHTML;
-        console.log(svgHtml);
-
         const svgBlob = convertSvgToBlob(svgHtml);
         const downloadUrl = URL.createObjectURL(svgBlob);
-
         const a = document.createElement("a");
         a.href = downloadUrl;
-        a.download = `${qrcodeName}.svg`; // Filename for the downloaded SVG
+        a.download = `${qrcodeName}.svg`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-
         URL.revokeObjectURL(downloadUrl);
     };
 
-    // Button component
-    function SubmitButton() {
-        const { pending } = useFormStatus();
-        return <Button disabled={pending}>Enregistrer le QR Code</Button>;
+    async function onSubmit(data: FormValues) {
+        setIsSubmitting(true);
+        setShowSVG(false);
+        setGeneralError(null);
+
+        try {
+            const formData = new FormData();
+            formData.append("name", data.name);
+            formData.append("hasFile", data.hasFile);
+
+            if (data.hasFile === "yes" && data.file) {
+                formData.append("file", data.file);
+            } else if (data.hasFile === "no" && data.url) {
+                formData.append("url", data.url);
+            }
+
+            const response = await fetch("/api/qrcode", {
+                method: "POST",
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 400 && result.error) {
+                    if (typeof result.error === "string") {
+                        setGeneralError(result.error);
+                    } else if (typeof result.error === "object") {
+                        // Handle field-specific errors if needed
+                    }
+                    throw new Error(
+                        typeof result.error === "string"
+                            ? result.error
+                            : "Le formulaire n'a pas pu être enregistré"
+                    );
+                } else {
+                    throw new Error("Failed to submit form");
+                }
+            }
+
+            setQrcodeName(result.data.name);
+            setQrcodeUrl(result.data.entryUrl);
+            setShowSVG(true);
+
+            toast({
+                title: "Form submitted successfully",
+                description: "Your QR code data has been saved.",
+            });
+        } catch (error: any) {
+            console.error("Submission error:", error);
+            if (!generalError) {
+                setGeneralError(
+                    error.message ||
+                        "An unexpected error occurred. Please try again."
+                );
+            }
+            toast({
+                title: "Error",
+                description:
+                    error.message || "Failed to submit form. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
-    const onSubmit = async (data: FormData) => {
-        console.log("SUCCESS", data);
-    };
-
-    const { register, handleSubmit, control } = useForm();
-
-    /** FORM HANDLING **/
-    const formAction = async (formData: FormData) => {
-        console.log(formData);
-
-        const parsedFormValue = qrcodeFormSchema.safeParse(formData);
-
-        if (!parsedFormValue.success) {
-            const err = parsedFormValue.error.format();
-
-            setFormError(err);
-            return;
-        }
-
-        let name = formData.get("name") as string;
-        const entryUrl = `${
-            process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + name.replace(" ", "_")
-        }` as string;
-
-        const isFile = formData.get("file_or_url") === "1";
-        const file = formData.get("file") as File;
-        let fileName = "";
-
-        if (file) {
-            fileName = file.name as string;
-            fileName = fileName.replace(" ", "_");
-            try {
-                const res = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (!res.ok) throw new Error(await res.text());
-            } catch (e: any) {
-                console.log(e);
-            }
-        }
-        const redirectionUrl = !isFileStatus
-            ? (formData.get("redirectionUrl") as string)
-            : process.env.NEXT_PUBLIC_MEDIA_QRCODE_URL + fileName;
-
-        // Construct the Params object expected by updateQRCode
-        const params: Params = {
-            name,
-            isFile,
-            fileName,
-            entryUrl,
-            redirectionUrl,
-        };
-
-        // Call the server action with the Params
-        const res = await updateQRCode(params);
-        if (res.status == 500) {
-            setIsFormValidated(false);
-            setAlertMessageOn(true);
-            setFormAlertClass("failure");
-        } else {
-            setIsFormValidated(true);
-            setUrl(entryUrl);
-            setFormAlertClass("success");
-            // router.push("/");
-        }
-    };
-
     return (
-        <>
-            {alertMessageOn && (
-                <Alert color={formAlertClass}>
-                    <span className="font-medium">
-                        {formAlertClass == "failure"
-                            ? alertMessages.qrcodeFailure.start
-                            : alertMessages.qrcodeSuccess.start}
-                    </span>{" "}
-                    {formAlertClass == "failure"
-                        ? alertMessages.qrcodeFailure.text
-                        : alertMessages.qrcodeSuccess.text}
-                </Alert>
+        <QRCodeFormLayout>
+            <h1 className="text-2xl font-bold mb-4">Créer un QR Code</h1>
+            {generalError && (
+                <div className="text-red-500 mb-4">{generalError}</div>
             )}
-            <form
-                className="flex max-w-md flex-col gap-2 justify-around"
-                onSubmit={handleSubmit(onSubmit)}
-            >
-                <div className="mb-2 block">
-                    <Label htmlFor="name" value="Nom du QR Code" />
-                </div>
-
-                <TextInput
-                    id="name"
-                    {...register("name")}
-                    value={qrcodeName}
-                    onChange={(e) => setQrcodeName(e.target.value)}
-                    required
-                />
-                <fieldset className="flex max-w-md flex-col gap-4">
-                    <legend className="my-4">
-                        Redirection vers une url ou un fichier ?
-                    </legend>
-                    <div className="flex items-center gap-2">
-                        <Radio
-                            id="radioFile"
-                            {...register("isFile")}
-                            value={1}
-                            onChange={() => setIsFileStatus(!isFileStatus)}
-                            defaultChecked
-                        />
-                        <Label htmlFor="radioFile">Fichier</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Radio
-                            id="radioUrl"
-                            {...register("isFile")}
-                            value={0}
-                            onChange={() => setIsFileStatus(!isFileStatus)}
-                        />
-                        <Label htmlFor="radioUrl">URL</Label>
-                    </div>
-                </fieldset>
-
-                {isFileStatus ? (
-                    <>
-                        <div className="mt-4 block">
-                            <Label
-                                htmlFor="file"
-                                value="Choisissez le fichier"
-                            />
-                        </div>
-                        <FileInput id="file" {...register("file")} />
-                    </>
-                ) : (
-                    <>
-                        <div className="mt-4 block">
-                            <Label htmlFor="url" value="URL" />
-                        </div>
-                        <TextInput
-                            id="url"
-                            {...register("redirectionUrl")}
-                            placeholder="exemple: https://www.youtube.com"
-                            onChange={handleUrl}
-                            value={url}
-                        />
-                    </>
-                )}
-                <SubmitButton />
-                {/* <Button type="submit" isProcessing={pending} disabled={pending}>
-                    Enregistrer le QR Code
-                </Button> */}
-            </form>
-            {isFormValidated && (
+            <CreateQRCodeForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
+            {showSVG && (
                 <>
                     <div className="py-6 transition-all" ref={svgContainer}>
                         <SVG
-                            text={url}
+                            text={qrcodeUrl}
                             options={{
                                 margin: 2,
                                 width: 150,
@@ -239,8 +130,6 @@ const QrCodeNew = () => {
                     </Button>
                 </>
             )}
-        </>
+        </QRCodeFormLayout>
     );
-};
-
-export default QrCodeNew;
+}

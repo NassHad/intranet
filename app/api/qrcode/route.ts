@@ -1,23 +1,52 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { connectToDB } from "@/utils/database";
+import QRCode from "@/lib/models/qrcode.model";
 import User from "@/lib/models/user.model";
 
-const saveUser = async (req: NextApiRequest, res: NextApiResponse) => {
+export async function POST(request: Request) {
     await connectToDB();
 
-    if (req.method === "POST") {
-        const { firstname, lastname, email, password } = req.body;
+    try {
+        const formData = await request.formData();
+        const name = formData.get("name") as string;
+        const hasFile = formData.get("hasFile") as string;
+        const file = formData.get("file") as File | null;
+        const url = formData.get("url") as string | null;
 
-        try {
-            const user = new User({ firstname, lastname, email, password });
-            await user.save();
-            res.status(200).json({ message: "User saved successfully", user });
-        } catch (error) {
-            res.status(500).json({ message: "Failed to save user", error });
+        const mediaUrl = "https://media.gti-sodifac.com/";
+
+        const existingQRCode = await QRCode.findOne({
+            name: name,
+        });
+        console.log(existingQRCode);
+
+        if (existingQRCode) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: { name: "Ce nom est déjà utilisé." },
+                },
+                { status: 400 }
+            );
         }
-    } else {
-        res.status(405).json({ message: "Method not allowed" });
-    }
-};
 
-export default saveUser;
+        const qrCode = new QRCode({
+            name: name.trim(),
+            isFile: hasFile === "yes",
+            fileName: file ? file.name : null,
+            redirectionUrl:
+                hasFile === "no" ? url : file ? mediaUrl + file.name : null,
+        });
+        // Save the initial QR code document
+        const savedQRCode = await qrCode.save();
+
+        // Update the QR code with the entryUrl
+        const entryUrl = `${mediaUrl}${savedQRCode._id}`;
+        savedQRCode.entryUrl = entryUrl;
+        await savedQRCode.save();
+
+        return NextResponse.json({ success: true, data: savedQRCode });
+    } catch (error: any) {
+        return NextResponse.json({ success: false, error: error.message });
+    }
+}

@@ -1,12 +1,29 @@
 import { FieldError, UseFormRegister } from "react-hook-form";
+import mongoose from "mongoose";
+import { Types } from "mongoose";
 
-export type FormData = {
+export interface IQRCode {
+    _id: mongoose.Types.ObjectId;
     name: string;
-    redirectionUrl: string;
     isFile: boolean;
-    file: File;
-    fileName: string;
-};
+    fileName?: string;
+    entryUrl: string;
+    redirectionUrl: string;
+    createdBy: mongoose.Types.ObjectId;
+    createdAt: Date;
+    updatedBy: mongoose.Types.ObjectId;
+    updatedAt: Date;
+}
+
+export interface QRCode {
+    _id: string;
+    name: string;
+    isFile: string;
+    fileName?: string;
+    entryUrl: string;
+    redirectionUrl: string;
+    // Add any other fields that your QRCode model has
+}
 
 export type FormFieldProps = {
     type: string;
