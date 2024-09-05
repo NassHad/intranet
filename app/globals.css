@@ -59,21 +59,25 @@
   }
 }
 
+.cl-rootBox {
+  margin: 0 auto;
+  padding-top: 4rem;
+}
+
+.cl-userButton-root {
+  padding: 1rem 2rem 1rem 0;
+}
+
+.leftSideBar {
+  height: 92vh;
+}
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply text-foreground;
+    @apply bg-background text-foreground;
   }
-}
-
-.cl-rootBox {
-  margin: 0 auto;
-  padding-top: 4rem;
-}
-
-.leftSideBar {
-  height: 92vh;
 }
