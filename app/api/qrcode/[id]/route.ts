@@ -69,8 +69,6 @@ export async function DELETE(
                 { status: 404 }
             );
         }
-        console.log(qrCode);
-        console.log(id);
 
         // Delete the QR code
         await QRCode.findByIdAndDelete(id);

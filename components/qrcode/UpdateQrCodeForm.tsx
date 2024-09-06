@@ -111,7 +111,6 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             const result = await response.json();
             setQrcodeName(result.data.name);
             setQrcodeUrl(result.data.entryUrl);
-            console.log(result);
 
             toast({
                 title: "QR code updated successfully",
@@ -119,7 +118,6 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             });
         } catch (error) {
             console.error("Update error:", error);
-            console.log(error);
 
             toast({
                 title: "Error",
