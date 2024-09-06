@@ -18,7 +18,6 @@ export async function POST(request: Request) {
         const existingQRCode = await QRCode.findOne({
             name: name,
         });
-        console.log(existingQRCode);
 
         if (existingQRCode) {
             return NextResponse.json(

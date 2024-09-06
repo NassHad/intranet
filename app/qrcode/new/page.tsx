@@ -58,6 +58,7 @@ export default function QRCodeNewForm() {
             });
 
             const result = await response.json();
+            console.log("Result", result);
 
             if (!response.ok) {
                 if (response.status === 400 && result.error) {
@@ -73,6 +74,15 @@ export default function QRCodeNewForm() {
                     );
                 } else {
                     throw new Error("Failed to submit form");
+                }
+            } else {
+                const uploadResponse = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error("Failed to upload file");
                 }
             }
 
