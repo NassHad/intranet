@@ -7,7 +7,6 @@ export default function Home() {
     return (
         <>
             <AreaChartStat />
-
             <div className="flex justify-around mt-10">
                 <div>
                     <BarChartStat />

@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Gauge, QrCode, Calendar } from "lucide-react";
-import { SignOutButton } from "@clerk/nextjs";
+import { Gauge, QrCode, Calendar, ShoppingCart } from "lucide-react";
 
 export default function LeftSidebar() {
     const pathname = usePathname();
@@ -25,6 +24,18 @@ export default function LeftSidebar() {
                         >
                             <Gauge className="mr-2 h-4 w-4" />
                             Tableau de bord
+                        </Button>
+                    </Link>
+                    <Link href="/dashboard" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/dashboard" && "bg-accent"
+                            )}
+                        >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Commande
                         </Button>
                     </Link>
                     <Link href="/qrcode" passHref>
