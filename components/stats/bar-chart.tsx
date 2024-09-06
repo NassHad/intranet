@@ -21,12 +21,12 @@ import {
 export const description = "A multiple bar chart";
 
 const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
+    { month: "Janvier", desktop: 186, mobile: 80 },
+    { month: "Février", desktop: 305, mobile: 200 },
+    { month: "Mars", desktop: 237, mobile: 120 },
+    { month: "Avril", desktop: 73, mobile: 190 },
+    { month: "Mai", desktop: 209, mobile: 130 },
+    { month: "Juin", desktop: 214, mobile: 140 },
 ];
 
 const chartConfig = {
@@ -44,8 +44,8 @@ export function BarChartStat() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Bar Chart - Multiple</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle>Graphique à barres - Multiple</CardTitle>
+                <CardDescription>Janvier - Juin 2024</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
@@ -56,7 +56,7 @@ export function BarChartStat() {
                             tickLine={false}
                             tickMargin={10}
                             axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 3)}
+                            tickFormatter={(value) => value.slice(0, 5)}
                         />
                         <ChartTooltip
                             cursor={false}
@@ -77,11 +77,11 @@ export function BarChartStat() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month{" "}
+                    Augmentation de 5.2% ce mois-ci{" "}
                     <TrendingUp className="h-4 w-4" />
                 </div>
                 <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
+                    Nombre total de visiteurs sur les 6 derniers mois
                 </div>
             </CardFooter>
         </Card>

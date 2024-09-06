@@ -21,17 +21,17 @@ import {
 export const description = "A bar chart with negative values";
 
 const chartData = [
-    { month: "January", visitors: 186 },
-    { month: "February", visitors: 205 },
-    { month: "March", visitors: -207 },
-    { month: "April", visitors: 173 },
-    { month: "May", visitors: -209 },
-    { month: "June", visitors: 214 },
+    { month: "Janvier", visitors: 186 },
+    { month: "Février", visitors: 205 },
+    { month: "Mars", visitors: -207 },
+    { month: "Avril", visitors: 173 },
+    { month: "Mai", visitors: -209 },
+    { month: "Juin", visitors: 214 },
 ];
 
 const chartConfig = {
     visitors: {
-        label: "Visitors",
+        label: "Visiteurs",
     },
 } satisfies ChartConfig;
 
@@ -39,8 +39,8 @@ export function BarChartNegativeStat() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Bar Chart - Negative</CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardTitle>Graphique à barres - Negatif</CardTitle>
+                <CardDescription>Janvier - Juin 2024</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
@@ -74,11 +74,11 @@ export function BarChartNegativeStat() {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month{" "}
+                    Augmentation de 5.2% ce mois-ci{" "}
                     <TrendingUp className="h-4 w-4" />
                 </div>
                 <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
+                    Nombre total de visiteurs sur les 6 derniers mois
                 </div>
             </CardFooter>
         </Card>

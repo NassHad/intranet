@@ -156,9 +156,9 @@ export function AreaChartStat() {
         <Card>
             <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
                 <div className="grid flex-1 gap-1 text-center sm:text-left">
-                    <CardTitle>Area Chart - Interactive</CardTitle>
+                    <CardTitle>Graphique en aires - Interactive</CardTitle>
                     <CardDescription>
-                        Showing total visitors for the last 3 months
+                        Nombre total de visiteurs sur les 30 derniers jours
                     </CardDescription>
                 </div>
                 <Select value={timeRange} onValueChange={setTimeRange}>
@@ -166,17 +166,17 @@ export function AreaChartStat() {
                         className="w-[160px] rounded-lg sm:ml-auto"
                         aria-label="Select a value"
                     >
-                        <SelectValue placeholder="Last 3 months" />
+                        <SelectValue placeholder="30 derniers jours" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
                         <SelectItem value="90d" className="rounded-lg">
-                            Last 3 months
+                            3 derniers mois
                         </SelectItem>
                         <SelectItem value="30d" className="rounded-lg">
-                            Last 30 days
+                            30 derniers jours
                         </SelectItem>
                         <SelectItem value="7d" className="rounded-lg">
-                            Last 7 days
+                            7 derniers jours
                         </SelectItem>
                     </SelectContent>
                 </Select>
@@ -234,7 +234,7 @@ export function AreaChartStat() {
                             minTickGap={32}
                             tickFormatter={(value) => {
                                 const date = new Date(value);
-                                return date.toLocaleDateString("en-US", {
+                                return date.toLocaleDateString("fr-FR", {
                                     month: "short",
                                     day: "numeric",
                                 });
