@@ -17,9 +17,5 @@ export default async function QRCodeListPage() {
         redirectionUrl: doc.redirectionUrl,
     }));
 
-    return (
-        <div className="container mx-auto py-10">
-            <QRCodeList qrCodes={plainQRCodes} />
-        </div>
-    );
+    return <QRCodeList qrCodes={plainQRCodes} />;
 }

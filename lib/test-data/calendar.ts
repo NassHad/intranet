@@ -11,10 +11,10 @@ export interface Schedule {
 }
 
 export const users: User[] = [
-    { id: 1, name: "Alice Johnson" },
-    { id: 2, name: "Bob Smith" },
-    { id: 3, name: "Charlie Brown" },
-    { id: 4, name: "Diana Prince" },
+    { id: 1, name: "Emmanuelle RAGOT" },
+    { id: 2, name: "Vinciane HANSELMANN" },
+    { id: 3, name: "Stella BLAIS" },
+    { id: 4, name: "Nassim HADDAD" },
 ];
 
 export const schedules: Schedule[] = [

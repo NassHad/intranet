@@ -1,5 +1,24 @@
-import Image from "next/image";
+import { AreaChartStat } from "@/components/stats/area-chart";
+import { BarChartStat } from "@/components/stats/bar-chart";
+import { BarChartNegativeStat } from "@/components/stats/bar-chart-negative";
+import { PieChartStat } from "@/components/stats/pie-chart";
 
 export default function Home() {
-    return <></>;
+    return (
+        <>
+            <AreaChartStat />
+
+            <div className="flex justify-around mt-10">
+                <div>
+                    <BarChartStat />
+                </div>
+                <div>
+                    <PieChartStat />
+                </div>
+                <div>
+                    <BarChartNegativeStat />
+                </div>
+            </div>
+        </>
+    );
 }

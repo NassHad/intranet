@@ -105,7 +105,6 @@ export default function QRCodeNewForm() {
 
     return (
         <QRCodeFormLayout>
-            <h1 className="text-2xl font-bold mb-4">Créer un QR Code</h1>
             {generalError && (
                 <div className="text-red-500 mb-4">{generalError}</div>
             )}
