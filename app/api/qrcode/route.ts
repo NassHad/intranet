@@ -13,7 +13,8 @@ export async function POST(request: Request) {
         const file = formData.get("file") as File | null;
         const url = formData.get("url") as string | null;
 
-        const mediaUrl = "https://media.gti-sodifac.com/";
+        const mediaUrl = "https://media.gti-sodifac.com/document/";
+        const mediaFolderUrl = "https://media.gti-sodifac.com/public/document/";
 
         const existingQRCode = await QRCode.findOne({
             name: name,
@@ -34,7 +35,11 @@ export async function POST(request: Request) {
             isFile: hasFile === "yes",
             fileName: file ? file.name : null,
             redirectionUrl:
-                hasFile === "no" ? url : file ? mediaUrl + file.name : null,
+                hasFile === "no"
+                    ? url
+                    : file
+                    ? mediaFolderUrl + file.name
+                    : null,
         });
         // Save the initial QR code document
         const savedQRCode = await qrCode.save();
