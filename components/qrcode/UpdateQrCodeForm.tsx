@@ -61,6 +61,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
     const [qrcodeUrl, setQrcodeUrl] = useState(" ");
     const [showSVG, setShowSVG] = useState(false);
     const { SVG } = useQRCode();
+    const [generalError, setGeneralError] = useState<string | null>(null);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(qrcodeUpdateSchema),
@@ -119,11 +120,35 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                 }
             );
 
+            const result = await response.json();
+            console.log("Result", result);
+
             if (!response.ok) {
-                throw new Error("Failed to update QR code");
+                if (response.status === 400 && result.error) {
+                    if (typeof result.error === "string") {
+                        setGeneralError(result.error);
+                    } else if (typeof result.error === "object") {
+                        // Handle field-specific errors if needed
+                    }
+                    throw new Error(
+                        typeof result.error === "string"
+                            ? result.error
+                            : "Le formulaire n'a pas pu être enregistré"
+                    );
+                } else {
+                    throw new Error("Failed to submit form");
+                }
+            } else {
+                const uploadResponse = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error("Failed to upload file");
+                }
             }
 
-            const result = await response.json();
             setQrcodeName(result.data.name);
             setQrcodeUrl(result.data.entryUrl);
 
