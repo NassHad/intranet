@@ -23,14 +23,37 @@ import { useQRCode } from "next-qrcode";
 // Toast
 import { useToast } from "@/hooks/use-toast";
 
-const qrcodeUpdateSchema = z.object({
-    name: z.string().min(3, {
-        message: "Name must be at least 2 characters.",
-    }),
-    hasFile: z.enum(["yes", "no"]),
-    file: z.instanceof(File).optional(),
-    url: z.string().url().optional(),
-});
+const qrcodeUpdateSchema = z
+    .object({
+        name: z.string().min(3, {
+            message: "Name must be at least 2 characters.",
+        }),
+        hasFile: z.enum(["yes", "no"]),
+        file: z.instanceof(File).optional(),
+        url: z.string().url().optional(),
+    })
+    .refine(
+        (data) => {
+            if (data.hasFile === "yes") {
+                return data.file instanceof File;
+            } else {
+                return (
+                    typeof data.url === "string" &&
+                    z.string().url().safeParse(data.url).success
+                );
+            }
+        },
+        {
+            message: "Please provide either a valid file or a valid URL",
+            path: ["file", "url"], // This will show the error on both fields
+        }
+    )
+    .and(
+        z.object({
+            file: z.instanceof(File).optional(),
+            url: z.string().optional(),
+        })
+    );
 
 type FormValues = z.infer<typeof qrcodeUpdateSchema>;
 
@@ -55,6 +78,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             name: qrCode.name,
             hasFile: qrCode.isFile ? "yes" : "no",
             url: qrCode.isFile ? "" : qrCode.redirectionUrl,
+            file: undefined,
         },
     });
 

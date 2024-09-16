@@ -13,7 +13,7 @@ export async function PUT(request: Request) {
         const file = formData.get("file") as File | null;
         const url = formData.get("url") as string | null;
 
-        const mediaUrl = "https://media.gti-sodifac.com/";
+        const mediaUrl = "https://qrcode.gti-sodifac.com/";
 
         const updateData: any = {
             name: name.trim(),
