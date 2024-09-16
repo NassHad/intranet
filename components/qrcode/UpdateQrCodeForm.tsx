@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 const qrcodeUpdateSchema = z
     .object({
         name: z.string().min(3, {
-            message: "Name must be at least 2 characters.",
+            message: "Name must be at least 3 characters.",
         }),
         hasFile: z.enum(["yes", "no"]),
         file: z.instanceof(File).optional(),
@@ -37,22 +37,13 @@ const qrcodeUpdateSchema = z
             if (data.hasFile === "yes") {
                 return data.file instanceof File;
             } else {
-                return (
-                    typeof data.url === "string" &&
-                    z.string().url().safeParse(data.url).success
-                );
+                return typeof data.url === "string" && data.url.length > 0;
             }
         },
         {
             message: "Please provide either a valid file or a valid URL",
-            path: ["file", "url"], // This will show the error on both fields
+            path: ["file", "url"],
         }
-    )
-    .and(
-        z.object({
-            file: z.instanceof(File).optional(),
-            url: z.string().optional(),
-        })
     );
 
 type FormValues = z.infer<typeof qrcodeUpdateSchema>;
@@ -67,41 +58,41 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
     const svgContainer = useRef<HTMLDivElement>(null);
 
     const [qrcodeName, setQrcodeName] = useState("");
-    const [qrcodeUrl, setQrcodeUrl] = useState(" "); // Have to be an empty string to prevent error
+    const [qrcodeUrl, setQrcodeUrl] = useState(" ");
     const [showSVG, setShowSVG] = useState(false);
     const { SVG } = useQRCode();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(qrcodeUpdateSchema),
         defaultValues: {
-            // Populate the form with default values
             name: qrCode.name,
             hasFile: qrCode.isFile ? "yes" : "no",
-            url: qrCode.isFile ? "" : qrCode.redirectionUrl,
+            url: qrCode.isFile ? undefined : qrCode.redirectionUrl,
             file: undefined,
         },
     });
 
     const watchHasFile = form.watch("hasFile");
 
-    const convertSvgToBlob = (svgHtml: any): Blob => {
+    const convertSvgToBlob = (svgHtml: string): Blob => {
         return new Blob([svgHtml], { type: "image/svg+xml" });
     };
 
     const downloadSvg = () => {
         const svgHtml = svgContainer.current?.innerHTML;
+        if (svgHtml) {
+            const svgBlob = convertSvgToBlob(svgHtml);
+            const downloadUrl = URL.createObjectURL(svgBlob);
 
-        const svgBlob = convertSvgToBlob(svgHtml);
-        const downloadUrl = URL.createObjectURL(svgBlob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `${qrcodeName}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
 
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = `${qrcodeName}.svg`; // Filename for the downloaded SVG
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        URL.revokeObjectURL(downloadUrl);
+            URL.revokeObjectURL(downloadUrl);
+        }
     };
 
     async function onSubmit(data: FormValues) {
@@ -236,10 +227,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                                     </FormControl>
                                     <FormDescription>
                                         Fichier actuel:{" "}
-                                        {qrCode.fileName != ""
-                                            ? qrCode.fileName
-                                            : "Aucun"}
-                                        .
+                                        {qrCode.fileName || "Aucun"}.
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
