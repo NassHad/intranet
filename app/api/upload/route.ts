@@ -34,7 +34,12 @@ export async function POST(request: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const uploadDir = path.join(process.cwd(), "..", "qrcode", "document");
+        const uploadDir = path.join(
+            process.cwd(),
+            "..",
+            "media_folder",
+            "document"
+        );
         const safeName = path
             .basename(file.name)
             .replace(/[^a-zA-Z0-9.-]/g, "_");
