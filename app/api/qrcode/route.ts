@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         const url = formData.get("url") as string | null;
 
         const mediaUrl = "https://media.gti-sodifac.com/document/";
-        const mediaFolderUrl = "https://media.gti-sodifac.com/public/document/";
+        const mediaFolderUrl = "https://qrcode.gti-sodifac.com/document/";
 
         const existingQRCode = await QRCode.findOne({
             name: name,
