@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
             "media_folder",
             "document"
         );
+        console.log(uploadDir);
+
         const safeName = path
             .basename(file.name)
             .replace(/[^a-zA-Z0-9.-]/g, "_");
