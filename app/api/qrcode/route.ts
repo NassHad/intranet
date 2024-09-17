@@ -33,12 +33,12 @@ export async function POST(request: Request) {
         const qrCode = new QRCode({
             name: name.trim(),
             isFile: hasFile === "yes",
-            fileName: file ? file.name : null,
+            fileName: file ? file.name.replace(/\s/g, "_") : null,
             redirectionUrl:
                 hasFile === "no"
                     ? url
                     : file
-                    ? mediaFolderUrl + file.name
+                    ? mediaFolderUrl + file.name.replace(/\s/g, "_")
                     : null,
         });
         // Save the initial QR code document

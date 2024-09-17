@@ -42,9 +42,7 @@ export async function POST(request: NextRequest) {
         );
         console.log(uploadDir);
 
-        const safeName = path
-            .basename(file.name)
-            .replace(/[^a-zA-Z0-9.-]/g, "_");
+        const safeName = path.basename(file.name).replace(/\s/g, "_");
         console.log("Upload Dir", uploadDir);
 
         const filePath = path.join(uploadDir, safeName);
