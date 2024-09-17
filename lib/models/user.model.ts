@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true,
-    },
     firstname: {
         type: String,
         required: true,
@@ -21,6 +17,17 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    userGroup: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "UserGroup",
+    },
+    salesman: {
+        type: Boolean,
+    },
+    salesmanCode: {
+        type: String,
+        default: null,
     },
 });
 
