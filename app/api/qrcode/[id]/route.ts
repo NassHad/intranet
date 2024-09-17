@@ -13,7 +13,7 @@ export async function PUT(request: Request) {
         const file = formData.get("file") as File | null;
         const url = formData.get("url") as string | null;
 
-        const mediaUrl = "https://qrcode.gti-sodifac.com/document";
+        const mediaUrl = process.env.PUBLIC_MEDIA_FOLDER_QRCODE_URL;
 
         const updateData: any = {
             name: name.trim(),
@@ -23,8 +23,9 @@ export async function PUT(request: Request) {
         if (hasFile === "yes" && file) {
             // Handle file upload here
             // For this example, we'll just use the file name
-            updateData.fileName = file.name;
-            updateData.redirectionUrl = mediaUrl + file.name;
+            updateData.fileName = file.name.replace(/\s/g, "_");
+            updateData.redirectionUrl =
+                mediaUrl + file.name.replace(/\s/g, "_");
         } else if (hasFile === "no" && url) {
             updateData.fileName = null;
             updateData.redirectionUrl = url;
