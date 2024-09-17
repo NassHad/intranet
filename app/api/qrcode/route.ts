@@ -13,7 +13,7 @@ export async function POST(request: Request) {
         const file = formData.get("file") as File | null;
         const url = formData.get("url") as string | null;
 
-        const mediaUrl = "https://media.gti-sodifac.com/document/";
+        const mediaUrl = "https://media.gti-sodifac.com/qrcode/";
         const mediaFolderUrl = "https://qrcode.gti-sodifac.com/document/";
 
         const existingQRCode = await QRCode.findOne({
