@@ -75,7 +75,7 @@ export default function QRCodeNewForm() {
                 } else {
                     throw new Error("Failed to submit form");
                 }
-            } else {
+            } else if (response.ok && data.hasFile === "yes") {
                 const uploadResponse = await fetch("/api/upload", {
                     method: "POST",
                     body: formData,
