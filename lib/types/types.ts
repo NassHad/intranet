@@ -49,6 +49,9 @@ export interface StatsType {
     userGroup: string;
     user: string;
     totalEarned: number;
+    totalEarnedByMonth: number;
+    set: number;
+    percentage: number | null;
 }
 
 export interface CategoryType {

@@ -27,6 +27,7 @@ import {
     UserGroupType,
     UserType,
 } from "@/lib/types/types";
+import { fetchStatisticsWithFilter } from "@/lib/actions/stats.action";
 
 interface StatsTestProps {
     users: UserType[];
@@ -75,6 +76,17 @@ const UserStats = ({
         return Array.from(uniqueYears).sort();
     }, [statistics]);
 
+    const fetchStats = async (filters: {
+        year: string;
+        month: string;
+        central: string;
+        category: string;
+        user: string;
+    }) => {
+        const result = await fetchStatisticsWithFilter(filters);
+        console.log(result);
+    };
+
     const filterData = (
         data: StatsType[],
         year: string,
@@ -83,6 +95,7 @@ const UserStats = ({
         category: string,
         user: string
     ) => {
+        fetchStats({ year, month, central, category, user });
         return data.filter(
             (stat) =>
                 (year === "All" || stat.year === year) &&
@@ -143,19 +156,40 @@ const UserStats = ({
         }
 
         const comparedData = [];
-        console.log(filteredData2);
+
+        let totalEarned1 = 0;
+        let totalEarned2 = 0;
 
         for (const item1 of filteredData1) {
+            totalEarned1 += item1.totalEarned;
+            item1.totalEarnedByMonth = totalEarned1;
             comparedData.push({ ...item1, set: 1 });
         }
         for (const item2 of filteredData2) {
+            totalEarned2 += item2.totalEarned;
+            item2.totalEarnedByMonth = totalEarned2;
             comparedData.push({ ...item2, set: 2 });
         }
+
+        if (
+            selectedYear1 !== "All" &&
+            selectedMonth1 !== "All" &&
+            selectedYear2 !== "All" &&
+            selectedMonth2 !== "All"
+        ) {
+            const percentageChange =
+                ((totalEarned2 - totalEarned1) / totalEarned1) * 100;
+            comparedData.forEach((item) => {
+                console.log(percentageChange);
+                item.percentage = percentageChange;
+            });
+        }
+
         return comparedData;
     }, [filteredData1, filteredData2, showComparison]);
 
     return (
-        <Card className="w-full max-w-4xl mx-auto">
+        <Card className="w-full mx-auto">
             <CardHeader>
                 <CardTitle>Comparaison des statistiques mensuelles</CardTitle>
             </CardHeader>
@@ -172,7 +206,7 @@ const UserStats = ({
                         Afficher la comparaison
                     </Label>
                 </div>
-                <div className="flex mb-4 flex-col">
+                <div className="flex mb-4 space-x-10">
                     <div>
                         <h3 className="text-sm font-medium mb-2">Ensemble 1</h3>
                         <div className="flex space-x-2">
@@ -396,6 +430,12 @@ const UserStats = ({
                                 <TableHead className="text-right">
                                     Montant
                                 </TableHead>
+                                <TableHead className="text-right border-solid border-b-4 border-b-slate-500">
+                                    Montant au mois complet
+                                </TableHead>
+                                <TableHead className="text-right border-solid border-b-4 border-b-slate-500">
+                                    Évolution %
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -403,7 +443,7 @@ const UserStats = ({
                                 <TableRow
                                     key={index}
                                     className={
-                                        stat.set === 2 ? "bg-teal-100" : ""
+                                        stat.set === 2 ? "bg-slate-200" : ""
                                     }
                                 >
                                     <TableCell>
@@ -429,6 +469,22 @@ const UserStats = ({
                                     <TableCell className="text-right">
                                         {stat.totalEarned}
                                     </TableCell>
+                                    <TableCell className="text-right border-solid border-l-4 border-l-slate-500">
+                                        {stat.totalEarnedByMonth}
+                                    </TableCell>
+                                    {showComparison &&
+                                        selectedYear1 !== "All" &&
+                                        selectedMonth1 !== "All" &&
+                                        selectedYear2 !== "All" &&
+                                        selectedMonth2 !== "All" && (
+                                            <TableCell className="text-right">
+                                                {stat.percentage !== null
+                                                    ? `${stat.percentage.toFixed(
+                                                          2
+                                                      )}%`
+                                                    : "-"}
+                                            </TableCell>
+                                        )}
                                 </TableRow>
                             ))}
                         </TableBody>

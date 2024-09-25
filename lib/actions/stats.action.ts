@@ -8,7 +8,7 @@ import { CentralType } from "@/lib/types/types";
 
 export async function fetchCategories() {
     try {
-        connectToDB();
+        await connectToDB();
         const categories = await Category.find();
         return JSON.parse(JSON.stringify(categories));
     } catch (error: any) {
@@ -18,7 +18,7 @@ export async function fetchCategories() {
 
 export async function fetchCentrals(): Promise<CentralType[]> {
     try {
-        connectToDB();
+        await connectToDB();
         const centrals = await Central.find();
 
         return JSON.parse(JSON.stringify(centrals));
@@ -29,7 +29,27 @@ export async function fetchCentrals(): Promise<CentralType[]> {
 
 export async function fetchStatistics() {
     try {
-        connectToDB();
+        await connectToDB();
+        const statistics = await Statistics.find();
+
+        return JSON.parse(JSON.stringify(statistics));
+    } catch (error: any) {
+        throw new Error(`Failed to fetch central: ${error.message}`);
+    }
+}
+
+export async function fetchStatisticsWithFilter(filters: {
+    year: string;
+    month: string;
+    category: string;
+    central: string;
+    user: string;
+}) {
+    "use server";
+    try {
+        await connectToDB();
+        console.log(filters);
+
         const statistics = await Statistics.find();
 
         return JSON.parse(JSON.stringify(statistics));
