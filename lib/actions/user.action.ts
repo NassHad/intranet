@@ -4,6 +4,7 @@ import { FilterQuery, SortOrder } from "mongoose";
 import { revalidatePath } from "next/cache";
 
 import User from "../models/user.model";
+import UserGroup from "../models/userGroup.model";
 
 import { connectToDB } from "@/utils/database";
 
@@ -12,6 +13,16 @@ export async function fetchUser(userId: string) {
         connectToDB();
 
         return await User.findOne({ id: userId });
+    } catch (error: any) {
+        throw new Error(`Failed to fetch user: ${error.message}`);
+    }
+}
+
+export async function fetchUsers() {
+    try {
+        connectToDB();
+        const users = await User.find();
+        return JSON.parse(JSON.stringify(users));
     } catch (error: any) {
         throw new Error(`Failed to fetch user: ${error.message}`);
     }
@@ -54,5 +65,16 @@ export async function updateUser({
         }
     } catch (error: any) {
         throw new Error(`Failed to create/update user: ${error.message}`);
+    }
+}
+
+export async function fetchUserGroup() {
+    try {
+        connectToDB();
+        const userGroup = await UserGroup.find();
+
+        return userGroup;
+    } catch (error: any) {
+        throw new Error(`Failed to fetch user group: ${error.message}`);
     }
 }
