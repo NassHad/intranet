@@ -73,7 +73,7 @@ export async function fetchUserGroup() {
         connectToDB();
         const userGroup = await UserGroup.find();
 
-        return userGroup;
+        return JSON.parse(JSON.stringify(userGroup));
     } catch (error: any) {
         throw new Error(`Failed to fetch user group: ${error.message}`);
     }
