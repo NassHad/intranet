@@ -29,6 +29,7 @@ import {
 } from "@/lib/types/types";
 import { fetchTotalEarned } from "@/lib/actions/stats.action";
 import { Button } from "../ui/button";
+import { BarChartStat } from "./bar-chart";
 
 interface StatsTestProps {
     users: UserType[];
@@ -70,6 +71,7 @@ const UserStats = ({
     const [selectedCentral2, setSelectedCentral2] = useState<string>("All");
     const [selectedCategory2, setSelectedCategory2] = useState<string>("All");
     const [selectedUser2, setSelectedUser2] = useState<string>("All");
+    const [graphData, setGraphData] = useState<object>({});
     const [showComparison, setShowComparison] = useState(false);
 
     const years = useMemo(() => {
@@ -86,6 +88,17 @@ const UserStats = ({
     }) => {
         const result = await fetchTotalEarned(filters);
         return result;
+    };
+
+    const handleShowStats = async () => {
+        const result = await fetchStats({
+            year: selectedYear1,
+            month: selectedMonth1,
+            central: selectedCentral1,
+            category: selectedCategory1,
+            user: selectedUser1,
+        });
+        setGraphData(result);
     };
 
     const filterData = (
@@ -187,17 +200,6 @@ const UserStats = ({
 
         return comparedData;
     }, [filteredData1, filteredData2, showComparison]);
-
-    const handleShowStats = async () => {
-        const result = await fetchStats({
-            year: selectedYear1,
-            month: selectedMonth1,
-            central: selectedCentral1,
-            category: selectedCategory1,
-            user: selectedUser1,
-        });
-        console.log(result);
-    };
 
     return (
         <>
@@ -505,16 +507,21 @@ const UserStats = ({
                     </div>
                 </CardContent>
             </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Statistiques globales</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center space-x-2 mb-4">
-                        <Button onClick={handleShowStats}>Show stats</Button>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="w-2/4">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Statistiques globales</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <BarChartStat data={graphData} />
+                        <div className="flex items-center space-x-2 mb-4">
+                            <Button onClick={handleShowStats}>
+                                Show stats
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </>
     );
 };

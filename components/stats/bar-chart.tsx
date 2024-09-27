@@ -40,7 +40,9 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export function BarChartStat() {
+export function BarChartStat({ data }: { data: object }) {
+    const dataPerMonth = data;
+
     return (
         <Card>
             <CardHeader>
