@@ -333,7 +333,7 @@ const UserStats = ({
 
                         {showComparison && (
                             <div className="overflow-hidden transition-all duration-300 ease-in-out max-h-20 opacity-100">
-                                <h3 className="text-sm font-medium mb-2 bg-teal-100">
+                                <h3 className="text-sm font-medium mb-2">
                                     Ensemble 2
                                 </h3>
                                 <div className="flex space-x-2">
@@ -463,12 +463,6 @@ const UserStats = ({
                                     <TableHead className="text-right">
                                         Montant
                                     </TableHead>
-                                    <TableHead className="text-right border-solid border-b-4 border-b-slate-500">
-                                        Montant au mois complet
-                                    </TableHead>
-                                    <TableHead className="text-right border-solid border-b-4 border-b-slate-500">
-                                        Évolution %
-                                    </TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -504,22 +498,6 @@ const UserStats = ({
                                         <TableCell className="text-right">
                                             {stat.totalEarned}
                                         </TableCell>
-                                        <TableCell className="text-right border-solid border-l-4 border-l-slate-500">
-                                            {stat.totalEarnedByMonth}
-                                        </TableCell>
-                                        {showComparison &&
-                                            selectedYear1 !== "All" &&
-                                            selectedMonth1 !== "All" &&
-                                            selectedYear2 !== "All" &&
-                                            selectedMonth2 !== "All" && (
-                                                <TableCell className="text-right">
-                                                    {stat.percentage !== null
-                                                        ? `${stat.percentage.toFixed(
-                                                              2
-                                                          )}%`
-                                                        : "-"}
-                                                </TableCell>
-                                            )}
                                     </TableRow>
                                 ))}
                             </TableBody>
