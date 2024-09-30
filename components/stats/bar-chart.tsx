@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
     Card,
@@ -20,58 +20,78 @@ import {
 
 export const description = "A multiple bar chart";
 
-const chartData = [
-    { month: "Janvier", desktop: 186, mobile: 80 },
-    { month: "Février", desktop: 305, mobile: 200 },
-    { month: "Mars", desktop: 237, mobile: 120 },
-    { month: "Avril", desktop: 73, mobile: 190 },
-    { month: "Mai", desktop: 209, mobile: 130 },
-    { month: "Juin", desktop: 214, mobile: 140 },
-];
-
 const chartConfig = {
-    desktop: {
-        label: "Desktop",
+    total: {
+        label: "Total",
         color: "hsl(var(--chart-1))",
-    },
-    mobile: {
-        label: "Mobile",
-        color: "hsl(var(--chart-2))",
     },
 } satisfies ChartConfig;
 
-export function BarChartStat({ data }: { data: object }) {
-    const dataPerMonth = data;
+const months = [
+    "Jan",
+    "Fev",
+    "Mars",
+    "Avr",
+    "Mai",
+    "Juin",
+    "Juil",
+    "Aout",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+];
+
+export function BarChartStat({ data1, data2 }: { data1: any[]; data2: any[] }) {
+    const transformedData = months.map((month, index) => {
+        const dataItem1 = data1?.find((item) => item.month - 1 === index);
+        const dataItem2 = data2?.find((item) => item.month - 1 === index);
+        return {
+            month: month,
+            total: dataItem1 ? dataItem1.total : 0,
+            total2: dataItem2 ? dataItem2.total : 0,
+        };
+    });
+
+    console.log("Transformed data", transformedData);
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Graphique à barres - Multiple</CardTitle>
-                <CardDescription>Janvier - Juin 2024</CardDescription>
+                <CardTitle>Graphique à barres - Total</CardTitle>
+                <CardDescription>Statistiques mensuelles</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
-                    <BarChart accessibilityLayer data={chartData}>
+                    <BarChart accessibilityLayer data={transformedData}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="month"
                             tickLine={false}
                             tickMargin={10}
                             axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 5)}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tickMargin={10}
+                            ticks={Array.from(
+                                { length: 21 },
+                                (_, i) => i * 1000
+                            )}
                         />
                         <ChartTooltip
                             cursor={false}
                             content={<ChartTooltipContent indicator="dashed" />}
                         />
                         <Bar
-                            dataKey="desktop"
-                            fill="var(--color-desktop)"
+                            dataKey="total"
+                            fill="var(--color-total)"
                             radius={4}
                         />
                         <Bar
-                            dataKey="mobile"
-                            fill="var(--color-mobile)"
+                            dataKey="total2"
+                            fill="var(--color-total2)"
                             radius={4}
                         />
                     </BarChart>
@@ -79,11 +99,11 @@ export function BarChartStat({ data }: { data: object }) {
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 font-medium leading-none">
-                    Augmentation de 5.2% ce mois-ci{" "}
+                    Statistiques mensuelles
                     <TrendingUp className="h-4 w-4" />
                 </div>
                 <div className="leading-none text-muted-foreground">
-                    Nombre total de visiteurs sur les 6 derniers mois
+                    Montant total par mois
                 </div>
             </CardFooter>
         </Card>

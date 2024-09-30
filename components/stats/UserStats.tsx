@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
     Table,
     TableBody,
@@ -28,7 +28,6 @@ import {
     UserType,
 } from "@/lib/types/types";
 import { fetchTotalEarned } from "@/lib/actions/stats.action";
-import { Button } from "../ui/button";
 import { BarChartStat } from "./bar-chart";
 
 interface StatsTestProps {
@@ -61,17 +60,18 @@ const UserStats = ({
     userGroups,
     users,
 }: StatsTestProps) => {
-    const [selectedYear1, setSelectedYear1] = useState<string>("2024");
+    const [selectedYear1, setSelectedYear1] = useState<string>("");
     const [selectedMonth1, setSelectedMonth1] = useState<string>("All");
     const [selectedCentral1, setSelectedCentral1] = useState<string>("All");
     const [selectedCategory1, setSelectedCategory1] = useState<string>("All");
     const [selectedUser1, setSelectedUser1] = useState<string>("All");
-    const [selectedYear2, setSelectedYear2] = useState<string>("2024");
+    const [selectedYear2, setSelectedYear2] = useState<string>("");
     const [selectedMonth2, setSelectedMonth2] = useState<string>("All");
     const [selectedCentral2, setSelectedCentral2] = useState<string>("All");
     const [selectedCategory2, setSelectedCategory2] = useState<string>("All");
     const [selectedUser2, setSelectedUser2] = useState<string>("All");
-    const [graphData, setGraphData] = useState<object>({});
+    const [graphData1, setGraphData1] = useState<any[]>([]);
+    const [graphData2, setGraphData2] = useState<any[]>([]);
     const [showComparison, setShowComparison] = useState(false);
 
     const years = useMemo(() => {
@@ -90,15 +90,30 @@ const UserStats = ({
         return result;
     };
 
-    const handleShowStats = async () => {
-        const result = await fetchStats({
-            year: selectedYear1,
-            month: selectedMonth1,
-            central: selectedCentral1,
-            category: selectedCategory1,
-            user: selectedUser1,
-        });
-        setGraphData(result);
+    const handleShowStats = async (graphStats: any) => {
+        const result = await fetchStats(graphStats);
+        console.log("Result 1", result);
+
+        // Transform the result into the format expected by BarChartStat
+        const transformedData = result[0]?.months?.map((month: any) => ({
+            month: month.month,
+            total: month.total,
+        }));
+
+        setGraphData1(transformedData);
+    };
+
+    const handleShowStats2 = async (graphStats: any) => {
+        const result = await fetchStats(graphStats);
+        console.log("Result 2", result);
+
+        // Transform the result into the format expected by BarChartStat
+        const transformedData = result[0]?.months?.map((month: any) => ({
+            month: month.month,
+            total: month.total,
+        }));
+
+        setGraphData2(transformedData);
     };
 
     const filterData = (
@@ -201,147 +216,65 @@ const UserStats = ({
         return comparedData;
     }, [filteredData1, filteredData2, showComparison]);
 
-    return (
-        <>
-            <Card className="w-full mx-auto">
-                <CardHeader>
-                    <CardTitle>
-                        Comparaison des statistiques mensuelles
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center space-x-2 mb-4">
-                        <Checkbox
-                            id="show-comparison"
-                            checked={showComparison}
-                            onCheckedChange={(checked) =>
-                                setShowComparison(checked as boolean)
-                            }
-                        />
-                        <Label htmlFor="show-comparison">
-                            Afficher la comparaison
-                        </Label>
-                    </div>
-                    <div className="flex mb-4 space-x-10">
-                        <div>
-                            <h3 className="text-sm font-medium mb-2">
-                                Ensemble 1
-                            </h3>
-                            <div className="flex space-x-2">
-                                <Select
-                                    value={selectedYear1}
-                                    onValueChange={setSelectedYear1}
-                                >
-                                    <SelectTrigger className="w-[100px]">
-                                        <SelectValue placeholder="Année" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">
-                                            Toutes
-                                        </SelectItem>
-                                        {years.map((year) => (
-                                            <SelectItem key={year} value={year}>
-                                                {year}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Select
-                                    value={selectedMonth1}
-                                    onValueChange={setSelectedMonth1}
-                                >
-                                    <SelectTrigger className="w-[120px]">
-                                        <SelectValue placeholder="Mois" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">
-                                            Tous
-                                        </SelectItem>
-                                        {months.map((month, index) => (
-                                            <SelectItem
-                                                key={index}
-                                                value={month}
-                                            >
-                                                {month}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Select
-                                    value={selectedCentral1}
-                                    onValueChange={setSelectedCentral1}
-                                >
-                                    <SelectTrigger className="w-[120px]">
-                                        <SelectValue placeholder="Centrale" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">
-                                            Toutes
-                                        </SelectItem>
-                                        {centrals.map((central) => (
-                                            <SelectItem
-                                                key={central._id}
-                                                value={central._id}
-                                            >
-                                                {central.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Select
-                                    value={selectedCategory1}
-                                    onValueChange={setSelectedCategory1}
-                                >
-                                    <SelectTrigger className="w-[120px]">
-                                        <SelectValue placeholder="Catégorie" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">
-                                            Toutes
-                                        </SelectItem>
-                                        {categories.map((category) => (
-                                            <SelectItem
-                                                key={category._id}
-                                                value={category._id}
-                                            >
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Select
-                                    value={selectedUser1}
-                                    onValueChange={setSelectedUser1}
-                                >
-                                    <SelectTrigger className="w-[120px]">
-                                        <SelectValue placeholder="Utilisateur" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">
-                                            Tous
-                                        </SelectItem>
-                                        {users.map((user) => (
-                                            <SelectItem
-                                                key={user._id}
-                                                value={user._id}
-                                            >
-                                                {user.firstname} {user.lastname}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
+    useEffect(() => {
+        handleShowStats({
+            year: selectedYear1,
+            month: selectedMonth1,
+            central: selectedCentral1,
+            category: selectedCategory1,
+            user: selectedUser1,
+        });
+        handleShowStats2({
+            year: selectedYear2,
+            month: selectedMonth2,
+            central: selectedCentral2,
+            category: selectedCategory2,
+            user: selectedUser2,
+        });
+    }, [
+        selectedYear1,
+        selectedMonth1,
+        selectedCentral1,
+        selectedCategory1,
+        selectedUser1,
+        selectedYear2,
+        selectedMonth2,
+        selectedCentral2,
+        selectedCategory2,
+        selectedUser2,
+    ]);
 
-                        {showComparison && (
-                            <div className="overflow-hidden transition-all duration-300 ease-in-out max-h-20 opacity-100">
+    return (
+        <div className="flex flex-row gap-4">
+            <div className="w-2/4">
+                <Card className="w-full mx-auto">
+                    <CardHeader>
+                        <CardTitle>
+                            Comparaison des statistiques mensuelles
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center space-x-2 mb-4">
+                            <Checkbox
+                                id="show-comparison"
+                                checked={showComparison}
+                                onCheckedChange={(checked) =>
+                                    setShowComparison(checked as boolean)
+                                }
+                            />
+                            <Label htmlFor="show-comparison">
+                                Afficher la comparaison
+                            </Label>
+                        </div>
+                        <div className="flex flex-col mb-4 space-y-4">
+                            <div>
                                 <h3 className="text-sm font-medium mb-2">
-                                    Ensemble 2
+                                    Ensemble 1
                                 </h3>
                                 <div className="flex space-x-2">
                                     <Select
-                                        value={selectedYear2}
-                                        onValueChange={setSelectedYear2}
+                                        value={selectedYear1}
+                                        onValueChange={setSelectedYear1}
                                     >
                                         <SelectTrigger className="w-[100px]">
                                             <SelectValue placeholder="Année" />
@@ -361,8 +294,8 @@ const UserStats = ({
                                         </SelectContent>
                                     </Select>
                                     <Select
-                                        value={selectedMonth2}
-                                        onValueChange={setSelectedMonth2}
+                                        value={selectedMonth1}
+                                        onValueChange={setSelectedMonth1}
                                     >
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue placeholder="Mois" />
@@ -382,8 +315,8 @@ const UserStats = ({
                                         </SelectContent>
                                     </Select>
                                     <Select
-                                        value={selectedCentral2}
-                                        onValueChange={setSelectedCentral2}
+                                        value={selectedCentral1}
+                                        onValueChange={setSelectedCentral1}
                                     >
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue placeholder="Centrale" />
@@ -403,8 +336,8 @@ const UserStats = ({
                                         </SelectContent>
                                     </Select>
                                     <Select
-                                        value={selectedCategory2}
-                                        onValueChange={setSelectedCategory2}
+                                        value={selectedCategory1}
+                                        onValueChange={setSelectedCategory1}
                                     >
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue placeholder="Catégorie" />
@@ -424,8 +357,8 @@ const UserStats = ({
                                         </SelectContent>
                                     </Select>
                                     <Select
-                                        value={selectedUser2}
-                                        onValueChange={setSelectedUser2}
+                                        value={selectedUser1}
+                                        onValueChange={setSelectedUser1}
                                     >
                                         <SelectTrigger className="w-[120px]">
                                             <SelectValue placeholder="Utilisateur" />
@@ -447,82 +380,201 @@ const UserStats = ({
                                     </Select>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                    <div className="overflow-hidden transition-all duration-300 ease-in-out">
-                        <Table>
-                            <TableCaption>
-                                Statistiques mensuelles{" "}
-                                {showComparison ? "comparées" : ""}
-                            </TableCaption>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Mois</TableHead>
-                                    <TableHead>Année</TableHead>
-                                    <TableHead>Centrale</TableHead>
-                                    <TableHead>Catégorie</TableHead>
-                                    <TableHead>Utilisateur</TableHead>
-                                    <TableHead className="text-right">
-                                        Montant
-                                    </TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {displayData.map((stat, index) => (
-                                    <TableRow
-                                        key={index}
-                                        className={
-                                            stat.set === 2 ? "bg-slate-200" : ""
-                                        }
-                                    >
-                                        <TableCell>
-                                            {months[parseInt(stat.month) - 1]}
-                                        </TableCell>
-                                        <TableCell>{stat.year}</TableCell>
-                                        <TableCell>
-                                            {centrals.find(
-                                                (c) => c._id === stat.central
-                                            )?.name || "Inconnu"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {categories.find(
-                                                (c) => c._id === stat.category
-                                            )?.name || "Inconnu"}
-                                        </TableCell>
-                                        <TableCell>
-                                            {users.find(
-                                                (u) => u._id === stat.user
-                                            )?.firstname || "Inconnu"}{" "}
-                                            {users.find(
-                                                (u) => u._id === stat.user
-                                            )?.lastname || ""}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {stat.totalEarned}
-                                        </TableCell>
+
+                            {showComparison && (
+                                <div className="overflow-hidden transition-all duration-300 ease-in-out max-h-20 opacity-100">
+                                    <h3 className="text-sm font-medium mb-2">
+                                        Ensemble 2
+                                    </h3>
+                                    <div className="flex space-x-2">
+                                        <Select
+                                            value={selectedYear2}
+                                            onValueChange={setSelectedYear2}
+                                        >
+                                            <SelectTrigger className="w-[100px]">
+                                                <SelectValue placeholder="Année" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="All">
+                                                    Toutes
+                                                </SelectItem>
+                                                {years.map((year) => (
+                                                    <SelectItem
+                                                        key={year}
+                                                        value={year}
+                                                    >
+                                                        {year}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Select
+                                            value={selectedMonth2}
+                                            onValueChange={setSelectedMonth2}
+                                        >
+                                            <SelectTrigger className="w-[120px]">
+                                                <SelectValue placeholder="Mois" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="All">
+                                                    Tous
+                                                </SelectItem>
+                                                {months.map((month, index) => (
+                                                    <SelectItem
+                                                        key={index}
+                                                        value={month}
+                                                    >
+                                                        {month}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Select
+                                            value={selectedCentral2}
+                                            onValueChange={setSelectedCentral2}
+                                        >
+                                            <SelectTrigger className="w-[120px]">
+                                                <SelectValue placeholder="Centrale" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="All">
+                                                    Toutes
+                                                </SelectItem>
+                                                {centrals.map((central) => (
+                                                    <SelectItem
+                                                        key={central._id}
+                                                        value={central._id}
+                                                    >
+                                                        {central.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Select
+                                            value={selectedCategory2}
+                                            onValueChange={setSelectedCategory2}
+                                        >
+                                            <SelectTrigger className="w-[120px]">
+                                                <SelectValue placeholder="Catégorie" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="All">
+                                                    Toutes
+                                                </SelectItem>
+                                                {categories.map((category) => (
+                                                    <SelectItem
+                                                        key={category._id}
+                                                        value={category._id}
+                                                    >
+                                                        {category.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Select
+                                            value={selectedUser2}
+                                            onValueChange={setSelectedUser2}
+                                        >
+                                            <SelectTrigger className="w-[120px]">
+                                                <SelectValue placeholder="Utilisateur" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="All">
+                                                    Tous
+                                                </SelectItem>
+                                                {users.map((user) => (
+                                                    <SelectItem
+                                                        key={user._id}
+                                                        value={user._id}
+                                                    >
+                                                        {user.firstname}{" "}
+                                                        {user.lastname}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="overflow-hidden transition-all duration-300 ease-in-out">
+                            <Table>
+                                <TableCaption>
+                                    Statistiques mensuelles{" "}
+                                    {showComparison ? "comparées" : ""}
+                                </TableCaption>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Mois</TableHead>
+                                        <TableHead>Année</TableHead>
+                                        <TableHead>Centrale</TableHead>
+                                        <TableHead>Catégorie</TableHead>
+                                        <TableHead>Utilisateur</TableHead>
+                                        <TableHead className="text-right">
+                                            Montant
+                                        </TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                </CardContent>
-            </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {displayData.map((stat, index) => (
+                                        <TableRow
+                                            key={index}
+                                            className={
+                                                stat.set === 2
+                                                    ? "bg-slate-200"
+                                                    : ""
+                                            }
+                                        >
+                                            <TableCell>
+                                                {
+                                                    months[
+                                                        parseInt(stat.month) - 1
+                                                    ]
+                                                }
+                                            </TableCell>
+                                            <TableCell>{stat.year}</TableCell>
+                                            <TableCell>
+                                                {centrals.find(
+                                                    (c) =>
+                                                        c._id === stat.central
+                                                )?.name || "Inconnu"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {categories.find(
+                                                    (c) =>
+                                                        c._id === stat.category
+                                                )?.name || "Inconnu"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {users.find(
+                                                    (u) => u._id === stat.user
+                                                )?.firstname || "Inconnu"}{" "}
+                                                {users.find(
+                                                    (u) => u._id === stat.user
+                                                )?.lastname || ""}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {stat.totalEarned}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
             <div className="w-2/4">
                 <Card>
                     <CardHeader>
                         <CardTitle>Statistiques globales</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <BarChartStat data={graphData} />
-                        <div className="flex items-center space-x-2 mb-4">
-                            <Button onClick={handleShowStats}>
-                                Show stats
-                            </Button>
-                        </div>
+                        <BarChartStat data1={graphData1} data2={graphData2} />
                     </CardContent>
                 </Card>
             </div>
-        </>
+        </div>
     );
 };
 

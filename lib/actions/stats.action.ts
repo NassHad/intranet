@@ -70,111 +70,63 @@ export async function fetchTotalEarned(filters: {
     year?: string;
     month?: string;
     user?: string;
+    central?: string;
+    category?: string;
 }) {
     "use server";
     try {
         await connectToDB();
 
-        let aggregationPipeline: any[] = [];
-        let monthlyTotals: any[] = [];
-        console.log(filters.user);
+        let matchFilter: any = {};
 
+        // Build match stage based on filters
+        if (filters.year && filters.year !== "All") {
+            matchFilter.year = parseInt(filters.year);
+        }
+        if (filters.month && filters.month !== "All") {
+            matchFilter.month = stringMonthToNumber(filters.month);
+        }
         if (filters.user && filters.user !== "All") {
-            const userId = new mongoose.Types.ObjectId(filters.user);
-            // User-specific totals for all years and months
-            aggregationPipeline = [
-                { $match: { user: userId } },
-                {
-                    $group: {
-                        _id: { year: "$year", month: "$month" },
-                        total: { $sum: "$totalEarned" },
-                    },
-                },
-                { $sort: { "_id.year": 1, "_id.month": 1 } },
-                {
-                    $group: {
-                        _id: "$_id.year",
-                        months: {
-                            $push: {
-                                month: "$_id.month",
-                                total: "$total",
-                            },
-                        },
-                        yearTotal: { $sum: "$total" },
-                    },
-                },
-                { $sort: { _id: 1 } },
-            ];
-        } else if (
-            filters.year &&
-            filters.month &&
-            filters.year !== "All" &&
-            filters.month !== "All"
-        ) {
-            // Total for specific year and month
-            const monthNumber = stringMonthToNumber(filters.month);
-            aggregationPipeline = [
-                {
-                    $match: {
-                        year: parseInt(filters.year),
-                        month: monthNumber,
-                    },
-                },
-                { $group: { _id: null, total: { $sum: "$totalEarned" } } },
-            ];
-        } else if (filters.year && filters.year !== "All") {
-            // Just the year
-            console.log("Just the year");
+            matchFilter.user = new mongoose.Types.ObjectId(filters.user);
+        }
+        if (filters.central && filters.central !== "All") {
+            matchFilter.central = new mongoose.Types.ObjectId(filters.central);
+        }
+        if (filters.category && filters.category !== "All") {
+            matchFilter.category = new mongoose.Types.ObjectId(
+                filters.category
+            );
+        }
 
-            // Total for specific year and monthly breakdown
-            aggregationPipeline = [
-                { $match: { year: parseInt(filters.year) } },
-                {
-                    $group: {
-                        _id: { year: "$year", month: "$month" },
-                        total: { $sum: "$totalEarned" },
-                    },
-                },
-                { $sort: { "_id.year": 1, "_id.month": 1 } },
-                {
-                    $group: {
-                        _id: "$_id.year",
-                        months: {
-                            $push: {
-                                month: "$_id.month",
-                                total: "$total",
-                            },
-                        },
-                        yearTotal: { $sum: "$total" },
-                    },
-                },
-                { $sort: { _id: 1 } },
-            ];
-            // monthlyTotals = await Statistics.aggregate(aggregationPipeline);
-
-            // // Calculate year total
-            // aggregationPipeline = [
-            //     { $match: { year: parseInt(filters.year) } },
-            //     { $group: { _id: null, total: { $sum: "$totalEarned" } } },
-            // ];
+        if (Object.keys(matchFilter).length === 0) {
+            return JSON.parse(JSON.stringify({}));
         } else {
-            throw new Error("Invalid filter combination");
+            let aggregationPipeline: any[] = [
+                { $match: matchFilter },
+                {
+                    $group: {
+                        _id: { year: "$year", month: "$month" },
+                        total: { $sum: "$totalEarned" },
+                    },
+                },
+                { $sort: { "_id.year": 1, "_id.month": 1 } },
+                {
+                    $group: {
+                        _id: "$_id.year",
+                        months: {
+                            $push: {
+                                month: "$_id.month",
+                                total: "$total",
+                            },
+                        },
+                        yearTotal: { $sum: "$total" },
+                    },
+                },
+                { $sort: { _id: 1 } },
+            ];
+            const result = await Statistics.aggregate(aggregationPipeline);
+            return JSON.parse(JSON.stringify(result));
         }
-
-        const result = await Statistics.aggregate(aggregationPipeline);
-
-        if (filters.year && !filters.month && !filters.user) {
-            return {
-                yearTotal: result[0]?.total || 0,
-                monthlyTotals: monthlyTotals.map((item) => ({
-                    month: item._id,
-                    total: item.total,
-                })),
-            };
-        }
-        console.log(result);
-
-        return JSON.parse(JSON.stringify(result));
     } catch (error: any) {
         throw new Error(`Failed to fetch total earned: ${error.message}`);
     }
