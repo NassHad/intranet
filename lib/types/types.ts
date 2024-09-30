@@ -34,6 +34,50 @@ export type FormFieldProps = {
     valueAsNumber?: boolean;
 };
 
+export interface CentralType {
+    _id: string;
+    name: string;
+}
+
+export interface StatsType {
+    _id: string;
+    name: string;
+    year: string;
+    month: string;
+    category: string;
+    central: string;
+    userGroup: string;
+    user: string;
+    totalEarned: number;
+    totalEarnedByMonth: number;
+    set: number;
+    percentage: number | null;
+}
+
+export interface CategoryType {
+    _id: string;
+    name: string;
+    active: boolean;
+    parent: string;
+}
+
+export interface UserType {
+    _id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    password: string;
+    userGroup: string;
+    salesman: boolean;
+    salesmanCode: string;
+}
+
+export interface UserGroupType {
+    _id: string;
+    name: string;
+    active: boolean;
+}
+
 export type ValidFieldNames =
     | "email"
     | "redirectionUrl"

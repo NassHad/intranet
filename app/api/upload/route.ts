@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"];
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 10MB
+const ALLOWED_FILE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "video/mp4",
+    "video/quicktime",
+];
 
 export async function POST(request: NextRequest) {
     try {
