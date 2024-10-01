@@ -8,19 +8,9 @@ import {
 import { fetchUserGroup, fetchUsers } from "@/lib/actions/user.action";
 
 export default async function DashboardPage() {
-    const users = await fetchUsers();
-    const centrals = await fetchCentrals();
-    const categories = await fetchCategories();
-    const userGroups = await fetchUserGroup();
-    const statistics = await fetchStatistics();
-
     return (
-        <CategoryCustomerStats
-            centrals={centrals}
-            statistics={statistics}
-            categories={categories}
-            userGroups={userGroups}
-            users={users}
-        />
+        <div>
+            <h1>Dashboard</h1>
+        </div>
     );
 }

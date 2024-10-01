@@ -32,16 +32,16 @@ export default function LeftSidebar() {
                             Tableau de bord
                         </Button>
                     </Link>
-                    <Link href="/stats" passHref>
+                    <Link href="/customers" passHref>
                         <Button
                             variant="ghost"
                             className={cn(
                                 "w-full justify-start",
-                                pathname === "/stats" && "bg-accent"
+                                pathname === "/customers" && "bg-accent"
                             )}
                         >
                             <ChartNoAxesCombined className="mr-2 h-4 w-4" />
-                            Statistiques
+                            Clients
                         </Button>
                     </Link>
                     <Link href="/dashboard" passHref>
@@ -53,7 +53,7 @@ export default function LeftSidebar() {
                             )}
                         >
                             <ShoppingCart className="mr-2 h-4 w-4" />
-                            Commande
+                            Commandes
                         </Button>
                     </Link>
                     <Link href="/qrcode" passHref>

@@ -566,12 +566,7 @@ const UserStats = ({
             </div>
             <div className="w-2/4">
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Statistiques globales</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <BarChartStat data1={graphData1} data2={graphData2} />
-                    </CardContent>
+                    <BarChartStat data1={graphData1} data2={graphData2} />
                 </Card>
             </div>
         </div>

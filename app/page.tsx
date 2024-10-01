@@ -9,9 +9,6 @@ export default function Home() {
             <AreaChartStat />
             <div className="flex justify-around mt-10">
                 <div>
-                    <BarChartStat />
-                </div>
-                <div>
                     <PieChartStat />
                 </div>
                 <div>
