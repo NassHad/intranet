@@ -11,6 +11,7 @@ import {
     Calendar,
     ShoppingCart,
     ChartNoAxesCombined,
+    CircleUser,
 } from "lucide-react";
 
 export default function LeftSidebar() {
@@ -32,6 +33,48 @@ export default function LeftSidebar() {
                             Tableau de bord
                         </Button>
                     </Link>
+
+                    <h2 className="text-lg font-bold">Clients</h2>
+                    <Link href="/customers" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/customers" && "bg-accent"
+                            )}
+                        >
+                            <CircleUser className="mr-2 h-4 w-4" />
+                            Liste des clients
+                        </Button>
+                    </Link>
+                    <Link href="/customers/key-account" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/customers/key-account" &&
+                                    "bg-accent"
+                            )}
+                        >
+                            <CircleUser className="mr-2 h-4 w-4" />
+                            Comptes clés
+                        </Button>
+                    </Link>
+
+                    {/* <Link href="/dashboard" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/dashboard" && "bg-accent"
+                            )}
+                        >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Commandes
+                        </Button>
+                    </Link> */}
+
+                    <h2 className="text-lg font-bold">Gestion</h2>
                     <Link href="/stats" passHref>
                         <Button
                             variant="ghost"
@@ -42,18 +85,6 @@ export default function LeftSidebar() {
                         >
                             <ChartNoAxesCombined className="mr-2 h-4 w-4" />
                             Statistiques
-                        </Button>
-                    </Link>
-                    <Link href="/dashboard" passHref>
-                        <Button
-                            variant="ghost"
-                            className={cn(
-                                "w-full justify-start",
-                                pathname === "/dashboard" && "bg-accent"
-                            )}
-                        >
-                            <ShoppingCart className="mr-2 h-4 w-4" />
-                            Commande
                         </Button>
                     </Link>
                     <Link href="/qrcode" passHref>

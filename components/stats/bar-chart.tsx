@@ -58,8 +58,8 @@ export function BarChartStat({ data1, data2 }: { data1: any[]; data2: any[] }) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Graphique à barres - Total</CardTitle>
-                <CardDescription>Statistiques mensuelles</CardDescription>
+                <CardTitle>Statistiques mensuelles</CardTitle>
+                <CardDescription></CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={chartConfig}>
