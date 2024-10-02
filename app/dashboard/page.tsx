@@ -1,4 +1,3 @@
-import CategoryCustomerStats from "@/components/stats/CategoryCustomerStats";
 import { Dashboard } from "@/components/stats/Dashboard";
 import {
     fetchCategories,
