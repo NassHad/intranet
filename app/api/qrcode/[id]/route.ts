@@ -31,6 +31,8 @@ export async function PUT(request: Request) {
             updateData.redirectionUrl = url;
         }
 
+        console.log(updateData);
+
         const updatedQRCode = await QRCode.findByIdAndUpdate(id, updateData, {
             new: true,
         });
