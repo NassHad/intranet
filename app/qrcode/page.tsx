@@ -3,7 +3,6 @@ import { connectToDB } from "@/utils/database";
 import QRCode from "@/lib/models/qrcode.model";
 import QRCodeList from "@/components/qrcode/QRCodeList";
 import { QRCode as QRCodeType } from "@/lib/types/types";
-import QRCodeLayout from "./form-layout";
 
 export default async function QRCodeListPage() {
     await connectToDB();
