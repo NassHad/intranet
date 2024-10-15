@@ -112,20 +112,6 @@ export default function LeftSidebar() {
                             Planning
                         </Button>
                     </Link>
-                    <h2 className="text-lg font-bold">AMB</h2>
-                    <Link href="/amb/custom-car-mats" passHref>
-                        <Button
-                            variant="ghost"
-                            className={cn(
-                                "w-full justify-start",
-                                pathname === "/amb/custom-car-mats" &&
-                                    "bg-accent"
-                            )}
-                        >
-                            <Car className="mr-2 h-4 w-4" />
-                            Tapis sur mesure
-                        </Button>
-                    </Link>
                 </nav>
             </ScrollArea>
         </div>
