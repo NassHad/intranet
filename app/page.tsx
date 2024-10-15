@@ -1,5 +1,4 @@
 import { AreaChartStat } from "@/components/stats/area-chart";
-import { BarChartStat } from "@/components/stats/bar-chart";
 import { BarChartNegativeStat } from "@/components/stats/bar-chart-negative";
 import { PieChartStat } from "@/components/stats/pie-chart";
 

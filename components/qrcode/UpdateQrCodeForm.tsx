@@ -122,6 +122,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
 
             const result = await response.json();
             console.log("Result", result);
+            console.log("HasFile", data.hasFile);
 
             if (!response.ok) {
                 if (response.status === 400 && result.error) {
@@ -138,7 +139,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                 } else {
                     throw new Error("Failed to submit form");
                 }
-            } else {
+            } else if (response.ok && data.hasFile === "yes") {
                 const uploadResponse = await fetch("/api/upload", {
                     method: "POST",
                     body: formData,

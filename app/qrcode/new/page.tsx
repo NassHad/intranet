@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CreateQRCodeForm } from "@/components/qrcode/CreateQrCodeForm";
 import type { FormValues } from "@/lib/schemas/qrcodeForm";
 import QRCodeFormLayout from "../form-layout";
+import { log } from "console";
 
 export default function QRCodeNewForm() {
     const { toast } = useToast();
@@ -23,17 +24,52 @@ export default function QRCodeNewForm() {
         return new Blob([svgHtml], { type: "image/svg+xml" });
     };
 
+    const fetchQRCodeFromAPI = async (): Promise<string> => {
+        try {
+            console.log(qrcodeUrl);
+
+            const response = await fetch(
+                `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrcodeUrl}&format=svg`
+            );
+            if (!response.ok) {
+                throw new Error("Failed to fetch QR code from API");
+            }
+            const svgText = await response.text();
+            const svgBlob = convertSvgToBlob(svgText);
+            const downloadUrl = URL.createObjectURL(svgBlob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `${qrcodeName}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+            return svgText;
+        } catch (error) {
+            console.error("Error fetching QR code from API:", error);
+            throw error;
+        }
+    };
+
     const downloadSvg = () => {
-        const svgHtml = svgContainer.current?.innerHTML;
-        const svgBlob = convertSvgToBlob(svgHtml);
-        const downloadUrl = URL.createObjectURL(svgBlob);
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = `${qrcodeName}.svg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
+        fetchQRCodeFromAPI();
+        // const svgElement = svgContainer.current?.querySelector("svg");
+        // if (!svgElement) {
+        //     console.error("SVG element not found");
+        //     return;
+        // }
+
+        // const serializer = new XMLSerializer();
+        // const svgString = serializer.serializeToString(svgElement);
+        // const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
+        // const downloadUrl = URL.createObjectURL(svgBlob);
+        // const a = document.createElement("a");
+        // a.href = downloadUrl;
+        // a.download = `${qrcodeName}.svg`;
+        // document.body.appendChild(a);
+        // a.click();
+        // document.body.removeChild(a);
+        // URL.revokeObjectURL(downloadUrl);
     };
 
     async function onSubmit(data: FormValues) {
