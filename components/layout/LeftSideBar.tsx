@@ -9,10 +9,9 @@ import {
     Gauge,
     QrCode,
     Calendar,
-    ShoppingCart,
     ChartNoAxesCombined,
     CircleUser,
-    Car,
+    NotebookText,
 } from "lucide-react";
 
 export default function LeftSidebar() {
@@ -32,6 +31,19 @@ export default function LeftSidebar() {
                         >
                             <Gauge className="mr-2 h-4 w-4" />
                             Tableau de bord
+                        </Button>
+                    </Link>
+                    <h2 className="text-lg font-bold">Organisation</h2>
+                    <Link href="/paid-leave" passHref>
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start",
+                                pathname === "/paid-leave" && "bg-accent"
+                            )}
+                        >
+                            <NotebookText className="mr-2 h-4 w-4" />
+                            Congés payés
                         </Button>
                     </Link>
 

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { CreateQRCodeForm } from "@/components/qrcode/CreateQrCodeForm";
 import type { FormValues } from "@/lib/schemas/qrcodeForm";
 import QRCodeFormLayout from "../form-layout";
-import { log } from "console";
 
 export default function QRCodeNewForm() {
     const { toast } = useToast();
