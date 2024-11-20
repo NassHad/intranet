@@ -58,8 +58,8 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
     const svgContainer = useRef<HTMLDivElement>(null);
 
     const [qrcodeName, setQrcodeName] = useState("");
-    const [qrcodeUrl, setQrcodeUrl] = useState(" ");
-    const [showSVG, setShowSVG] = useState(false);
+    const [qrcodeUrl, setQrcodeUrl] = useState(qrCode.entryUrl);
+    const [showSVG, setShowSVG] = useState(true);
     const { SVG } = useQRCode();
     const [generalError, setGeneralError] = useState<string | null>(null);
 

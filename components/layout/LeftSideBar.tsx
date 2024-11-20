@@ -21,7 +21,7 @@ export default function LeftSidebar() {
         <div className="flex w-64 flex-col border-r bg-background leftSideBar">
             <ScrollArea className="flex-1">
                 <nav className="flex flex-col gap-2 p-4">
-                    <Link href="/" passHref>
+                    {/* <Link href="/" passHref>
                         <Button
                             variant="ghost"
                             className={cn(
@@ -72,7 +72,7 @@ export default function LeftSidebar() {
                             <CircleUser className="mr-2 h-4 w-4" />
                             Comptes clés
                         </Button>
-                    </Link>
+                    </Link> */}
 
                     {/* <Link href="/dashboard" passHref>
                         <Button
@@ -88,7 +88,7 @@ export default function LeftSidebar() {
                     </Link> */}
 
                     <h2 className="text-lg font-bold">Gestion</h2>
-                    <Link href="/stats" passHref>
+                    {/* <Link href="/stats" passHref>
                         <Button
                             variant="ghost"
                             className={cn(
@@ -99,7 +99,7 @@ export default function LeftSidebar() {
                             <ChartNoAxesCombined className="mr-2 h-4 w-4" />
                             Statistiques
                         </Button>
-                    </Link>
+                    </Link> */}
                     <Link href="/qrcode" passHref>
                         <Button
                             variant="ghost"
@@ -112,7 +112,7 @@ export default function LeftSidebar() {
                             QR Code
                         </Button>
                     </Link>
-                    <Link href="/calendar" passHref>
+                    {/* <Link href="/calendar" passHref>
                         <Button
                             variant="ghost"
                             className={cn(
@@ -123,7 +123,7 @@ export default function LeftSidebar() {
                             <Calendar className="mr-2 h-4 w-4" />
                             Planning
                         </Button>
-                    </Link>
+                    </Link> */}
                 </nav>
             </ScrollArea>
         </div>

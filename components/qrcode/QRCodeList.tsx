@@ -1,7 +1,6 @@
-// components/QRCodeList.tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -38,8 +37,12 @@ interface QRCodeListProps {
     qrCodes: QRCode[];
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export default function QRCodeList({ qrCodes }: QRCodeListProps) {
     const [qrCodeList, setQRCodeList] = useState(qrCodes);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
     const router = useRouter();
 
     const handleDelete = async (id: string) => {
@@ -61,6 +64,33 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
         }
     };
 
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredQRCodes = qrCodeList.filter(
+        (qrCode) =>
+            qrCode.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            qrCode.redirectionUrl
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+    );
+
+    const indexOfLastQRCode = currentPage * ITEMS_PER_PAGE;
+    const indexOfFirstQRCode = indexOfLastQRCode - ITEMS_PER_PAGE;
+    const currentQRCodes = filteredQRCodes.slice(
+        indexOfFirstQRCode,
+        indexOfLastQRCode
+    );
+
+    const totalPages = Math.ceil(filteredQRCodes.length / ITEMS_PER_PAGE);
+
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+    useEffect(() => {
+        setCurrentPage(1); // Reset to the first page when the search term changes
+    }, [searchTerm]);
+
     return (
         <>
             <Card>
@@ -74,6 +104,15 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Rechercher par nom ou URL"
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="w-full max-w-xl border rounded-lg py-2 px-2 border-slate-300"
+                        />
+                    </div>
                     <Table className="mt-4">
                         <TableHeader>
                             <TableRow>
@@ -83,7 +122,7 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {qrCodeList.map((qrCode) => (
+                            {currentQRCodes.map((qrCode) => (
                                 <TableRow key={qrCode._id.toString()}>
                                     <TableCell className="font-medium">
                                         {qrCode.name}
@@ -110,15 +149,13 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>
-                                                            Êtes vous vraiment
-                                                            sûr ?
+                                                            Confirmer la
+                                                            suppression
                                                         </AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            Cette action est
-                                                            irréversible. Il
-                                                            vous saura toujours
-                                                            possible de créer à
-                                                            nouveau ce QR Code.
+                                                            Êtes-vous sûr de
+                                                            vouloir supprimer ce
+                                                            QR code ?
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>
@@ -143,6 +180,22 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
                             ))}
                         </TableBody>
                     </Table>
+                    <div className="flex justify-end mt-4">
+                        <Button
+                            variant="outline"
+                            disabled={currentPage === 1}
+                            onClick={() => paginate(currentPage - 1)}
+                        >
+                            Précédent
+                        </Button>
+                        <Button
+                            variant="outline"
+                            disabled={currentPage === totalPages}
+                            onClick={() => paginate(currentPage + 1)}
+                        >
+                            Suivant
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </>
