@@ -2,20 +2,20 @@ import { z } from "zod";
 
 const qrcodeFormSchema = z.discriminatedUnion("hasFile", [
     z.object({
-        name: z.string().min(2, {
-            message: "Name must be at least 2 characters.",
+        name: z.string().min(3, {
+            message: "Name must be at least 3 characters.",
         }),
         hasFile: z.literal("yes"),
-        file: z.instanceof(File).refine((file) => {
-            return file.size <= 100000000; // 100MB
-        }, "File size should be less than 100MB"),
+        file: z.instanceof(File),
+        url: z.string().optional(),
     }),
     z.object({
-        name: z.string().min(2, {
-            message: "Name must be at least 2 characters.",
+        name: z.string().min(3, {
+            message: "Name must be at least 3 characters.",
         }),
         hasFile: z.literal("no"),
-        url: z.string().url("Please enter a valid URL"),
+        url: z.string().url(),
+        file: z.any().optional(),
     }),
 ]);
 

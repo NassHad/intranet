@@ -13,7 +13,7 @@ export async function PUT(request: Request) {
         const file = formData.get("file") as File | null;
         const url = formData.get("url") as string | null;
 
-        const mediaUrl = process.env.PUBLIC_MEDIA_FOLDER_QRCODE_URL;
+        const mediaUrl = process.env.NEXT_PUBLIC_FOLDER_QRCODE_URL;
 
         const updateData: any = {
             name: name.trim(),
@@ -30,8 +30,6 @@ export async function PUT(request: Request) {
             updateData.fileName = null;
             updateData.redirectionUrl = url;
         }
-
-        console.log(updateData);
 
         const updatedQRCode = await QRCode.findByIdAndUpdate(id, updateData, {
             new: true,

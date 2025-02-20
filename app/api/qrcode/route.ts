@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDB } from "@/utils/database";
 import QRCode from "@/lib/models/qrcode.model";
-import User from "@/lib/models/user.model";
 
 export async function POST(request: Request) {
     await connectToDB();
