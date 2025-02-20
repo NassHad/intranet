@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,7 +59,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
 
     const [qrcodeName, setQrcodeName] = useState("");
     const [qrcodeUrl, setQrcodeUrl] = useState(qrCode.entryUrl);
-    const [showSVG, setShowSVG] = useState(true);
+    const [showSVG, setShowSVG] = useState(false);
     const { SVG } = useQRCode();
     const [generalError, setGeneralError] = useState<string | null>(null);
 
@@ -68,10 +68,20 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
         defaultValues: {
             name: qrCode.name,
             hasFile: qrCode.isFile ? "yes" : "no",
-            url: qrCode.isFile ? undefined : qrCode.redirectionUrl,
-            file: undefined,
+            ...(qrCode.isFile
+                ? { file: undefined }
+                : { url: qrCode.redirectionUrl }),
         },
     });
+
+    useEffect(() => {
+        const hasFile = form.watch("hasFile");
+        if (hasFile === "yes") {
+            form.setValue("url", undefined);
+        } else {
+            form.setValue("file", undefined);
+        }
+    }, [form.watch("hasFile")]);
 
     const watchHasFile = form.watch("hasFile");
 
@@ -271,6 +281,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                                         <Input
                                             placeholder="https://example.com"
                                             {...field}
+                                            value={field.value || ""} // Ensure value is never undefined
                                         />
                                     </FormControl>
                                     <FormDescription>
@@ -286,6 +297,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                     </Button>
                 </form>
             </Form>
+            <button onClick={() => setShowSVG(!showSVG)}>Toggle SVG</button>
             {showSVG && (
                 <>
                     <div className="py-6 transition-all" ref={svgContainer}>
