@@ -59,7 +59,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
 
     const [qrcodeName, setQrcodeName] = useState("");
     const [qrcodeUrl, setQrcodeUrl] = useState(qrCode.entryUrl);
-    const [showSVG, setShowSVG] = useState(false);
+    const [showSVG, setShowSVG] = useState(true);
     const { SVG } = useQRCode();
     const [generalError, setGeneralError] = useState<string | null>(null);
 
@@ -105,6 +105,38 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             URL.revokeObjectURL(downloadUrl);
         }
     };
+
+    const fetchQRCodeFromAPI = async (): Promise<string> => {
+        try {
+            console.log(qrcodeUrl);
+
+            const response = await fetch(
+                `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrcodeUrl}&format=svg`
+            );
+            if (!response.ok) {
+                throw new Error("Failed to fetch QR code from API");
+            }
+            const svgText = await response.text();
+            const svgBlob = convertSvgToBlob(svgText);
+            const downloadUrl = URL.createObjectURL(svgBlob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = `${qrcodeName}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+            return svgText;
+        } catch (error) {
+            console.error("Error fetching QR code from API:", error);
+            throw error;
+        }
+    };
+
+    // Fetch QR Code from API
+    useEffect(() => {
+        fetchQRCodeFromAPI();
+    }, [qrcodeUrl]);
 
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true);
@@ -297,7 +329,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                     </Button>
                 </form>
             </Form>
-            <button onClick={() => setShowSVG(!showSVG)}>Toggle SVG</button>
+            {/* <button onClick={() => setShowSVG(!showSVG)}>Toggle SVG</button> */}
             {showSVG && (
                 <>
                     <div className="py-6 transition-all" ref={svgContainer}>
@@ -313,7 +345,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                             }}
                         />
                     </div>
-                    <Button type="button" onClick={downloadSvg}>
+                    <Button type="button" onClick={fetchQRCodeFromAPI}>
                         Télécharger le QR Code
                     </Button>
                 </>
