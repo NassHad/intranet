@@ -50,27 +50,6 @@ export default function QRCodeNewForm() {
         }
     };
 
-    const downloadSvg = () => {
-        fetchQRCodeFromAPI();
-        // const svgElement = svgContainer.current?.querySelector("svg");
-        // if (!svgElement) {
-        //     console.error("SVG element not found");
-        //     return;
-        // }
-
-        // const serializer = new XMLSerializer();
-        // const svgString = serializer.serializeToString(svgElement);
-        // const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
-        // const downloadUrl = URL.createObjectURL(svgBlob);
-        // const a = document.createElement("a");
-        // a.href = downloadUrl;
-        // a.download = `${qrcodeName}.svg`;
-        // document.body.appendChild(a);
-        // a.click();
-        // document.body.removeChild(a);
-        // URL.revokeObjectURL(downloadUrl);
-    };
-
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true);
         setShowSVG(false);
@@ -169,7 +148,7 @@ export default function QRCodeNewForm() {
                             }}
                         />
                     </div>
-                    <Button type="button" onClick={downloadSvg}>
+                    <Button type="button" onClick={fetchQRCodeFromAPI}>
                         Télécharger le QR Code
                     </Button>
                 </>

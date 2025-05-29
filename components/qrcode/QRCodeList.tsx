@@ -132,48 +132,64 @@ export default function QRCodeList({ qrCodes }: QRCodeListProps) {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex space-x-2">
-                                            <Link
-                                                href={`/qrcode/${qrCode._id}/edit`}
-                                                passHref
-                                            >
-                                                <Button variant="outline">
-                                                    Modifier
-                                                </Button>
-                                            </Link>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="destructive">
-                                                        Supprimer
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>
-                                                            Confirmer la
-                                                            suppression
-                                                        </AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            Êtes-vous sûr de
-                                                            vouloir supprimer ce
-                                                            QR code ?
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>
-                                                            Annuler
-                                                        </AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    qrCode._id.toString()
-                                                                )
-                                                            }
+                                            {/* If qrcode redirectionUrl contains "demo.sodifac.com", don't display the "modifier" button */}
+                                            {qrCode.redirectionUrl.includes(
+                                                "demo.sodifac.com"
+                                            ) ? (
+                                                <div className="text-gray-500">
+                                                    Ce QR code n'est pas
+                                                    modifiable ici
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Link
+                                                        href={`/qrcode/${qrCode._id}/edit`}
+                                                        passHref
+                                                    >
+                                                        <Button variant="outline">
+                                                            Modifier
+                                                        </Button>
+                                                    </Link>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger
+                                                            asChild
                                                         >
-                                                            Supprimer
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
+                                                            <Button variant="destructive">
+                                                                Supprimer
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>
+                                                                    Confirmer la
+                                                                    suppression
+                                                                </AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Êtes-vous
+                                                                    sûr de
+                                                                    vouloir
+                                                                    supprimer ce
+                                                                    QR code ?
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>
+                                                                    Annuler
+                                                                </AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            qrCode._id.toString()
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Supprimer
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>
