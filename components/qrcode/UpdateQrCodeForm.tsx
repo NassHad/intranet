@@ -89,27 +89,8 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
         return new Blob([svgHtml], { type: "image/svg+xml" });
     };
 
-    const downloadSvg = () => {
-        const svgHtml = svgContainer.current?.innerHTML;
-        if (svgHtml) {
-            const svgBlob = convertSvgToBlob(svgHtml);
-            const downloadUrl = URL.createObjectURL(svgBlob);
-
-            const a = document.createElement("a");
-            a.href = downloadUrl;
-            a.download = `${qrcodeName}.svg`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            URL.revokeObjectURL(downloadUrl);
-        }
-    };
-
     const fetchQRCodeFromAPI = async (): Promise<string> => {
         try {
-            console.log(qrcodeUrl);
-
             const response = await fetch(
                 `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrcodeUrl}&format=svg`
             );
@@ -132,11 +113,6 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             throw error;
         }
     };
-
-    // Fetch QR Code from API
-    useEffect(() => {
-        fetchQRCodeFromAPI();
-    }, [qrcodeUrl]);
 
     async function onSubmit(data: FormValues) {
         setIsSubmitting(true);
