@@ -259,7 +259,7 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
                                 field: { onChange, value, ...rest },
                             }) => (
                                 <FormItem>
-                                    <FormLabel>File</FormLabel>
+                                    <FormLabel>Fichier</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="file"
