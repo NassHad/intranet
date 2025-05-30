@@ -172,15 +172,16 @@ export function UpdateQRCodeForm({ qrCode }: UpdateQRCodeFormProps) {
             setQrcodeUrl(result.data.entryUrl);
 
             toast({
-                title: "QR code updated successfully",
-                description: "Your QR code has been updated.",
+                title: "Modification réussie",
+                description: "Votre QR code a été modifié.",
             });
         } catch (error) {
             console.error("Update error:", error);
 
             toast({
-                title: "Error",
-                description: "Failed to update QR code. Please try again.",
+                title: "Erreur",
+                description:
+                    "Impossible de modifier le QR code. Veuillez réessayer.",
                 variant: "destructive",
             });
         } finally {
