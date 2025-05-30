@@ -121,7 +121,7 @@ export function CreateQRCodeForm({ onSubmit, isSubmitting }: QRCodeFormProps) {
                                     field: { onChange, value, ...rest },
                                 }) => (
                                     <FormItem>
-                                        <FormLabel>File</FormLabel>
+                                        <FormLabel>Fichier</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="file"
@@ -134,7 +134,7 @@ export function CreateQRCodeForm({ onSubmit, isSubmitting }: QRCodeFormProps) {
                                             />
                                         </FormControl>
                                         <FormDescription>
-                                            Upload a file (max 5MB).
+                                            Uploader un fichier (max 1GO).
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -163,7 +163,7 @@ export function CreateQRCodeForm({ onSubmit, isSubmitting }: QRCodeFormProps) {
                             />
                         )}
                         <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Submitting..." : "Submit"}
+                            {isSubmitting ? "Envoi en cours..." : "Envoyer"}
                         </Button>
                     </form>
                 </Form>
